@@ -28,6 +28,7 @@ session_start();
 //DEFINE APPLICATION  PARAMETERS
 define("uriPath","transient.chtneast.org");
 define("treeTop","https://" . uriPath);
+define("ownerTreeTop","https://facedev.chtneast.org");
 define("dataPath","https://" . uriPath . "/data-services");
 define("applicationTree","/srv/chtneastapp/nwtransient");
 define("genAppFiles","/srv/chtneastapp/nwtransient");
