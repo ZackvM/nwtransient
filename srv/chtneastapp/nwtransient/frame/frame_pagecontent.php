@@ -11,24 +11,33 @@ class pagecontent {
       $this->serverapi = $serverpw;
     }
 
+    function newsearch ( $rqst ) { 
+      $tt = treeTop;      
+      $at = genAppFiles;
+      $cb = new bldcontent();  
+      $pageData = $cb->newsearch( $rqst );
+$pge = <<<PAGECONTENT
+<div id=mainPageDiv>
+  {$pageData} 
+</div>
+PAGECONTENT;
+      return $pge;
+    }
+
     function root ( $rqst ) { 
       $tt = treeTop;      
       $at = genAppFiles;
       $cb = new bldcontent();  
       $pageData = $cb->root( $rqst );
-
 $pge = <<<PAGECONTENT
-
 <div id=mainPageDiv>
   {$pageData} 
 </div>
 <div id=swirlddsp></div>
 PAGECONTENT;
-
       return $pge;
-
     } 
-    
+ 
     function generateHeader( $whichpage) {
       $tt = treeTop;      
       $at = genAppFiles;

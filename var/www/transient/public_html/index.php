@@ -57,8 +57,6 @@ $https = ($_SERVER['HTTPS'] == 'on') ? "https://" : "http://";
 $originalRequest = str_replace("-","", strtolower($_SERVER['REQUEST_URI']));
 $request = explode("/",str_replace("-","", strtolower($_SERVER['REQUEST_URI']))); 
 
-
-
 switch ($request[1]) {
   case 'dataservices': 
   //BOTH GET AND POSTS GO HERE
@@ -81,7 +79,7 @@ switch ($request[1]) {
          $data = $doer->rtnData;
       } else { 
         $responseCode = 401;
-        $data = "USER NOT FOUND";
+        $data = "USER NOT FOUND ... ";
       } 
       break;
       case 'GET':

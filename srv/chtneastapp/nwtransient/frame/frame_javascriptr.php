@@ -3,6 +3,18 @@
 
 class javascriptr {
 
+  private $teststring = "";
+  private $regid = "";
+  private $regcode = "XXX";
+
+  function __construct() {
+    session_start();   
+    $reguser = registerServerIdent();
+    $this->teststring = "ZACK WAS HERE IN THE TEST STRING";
+    $this->regid = $reguser['u'];
+    $this->regcode = $reguser['i']; 
+  }
+
     function globalscripts ( $rqst ) {
   session_start();
   $sid = session_id();
@@ -10,15 +22,17 @@ class javascriptr {
   $dtaTree = dataPath;
   $eMod = encryptModulus;
   $eExpo = encryptExponent;
-  $si = serverIdent;
-  $sp = apikey;
+  //LOCAL USER CREDENTIALS BUILT HERE
+  $regUsr = $this->regid;  
+  $regCode = $this->regcode;
+  
   $rtnThis = <<<GLOBJAVA
 
     var byId = function( id ) { return document.getElementById( id ); };
     var treeTop = "{$tt}";
     var dtaPath = "{$dtaTree}";
-    var si = "{$si}";
-    var sp = "{$sp}";
+    var regu = "{$regUsr}";
+    var regi = "{$regCode}";
 
     var httpage = getXMLHTTPRequest();
     function getXMLHTTPRequest() {
@@ -53,7 +67,88 @@ class javascriptr {
 GLOBJAVA;
   return $rtnThis;
 }        
-    
+
+function newsearch ( $rqst ) {
+  $dp = dataPath;
+
+  $rtnThis = <<<GLOBJAVA
+
+document.addEventListener('DOMContentLoaded', function() {
+
+  var el = document.querySelectorAll(".criteriaInputField");
+  el.forEach((inputs) => {
+   inputs.addEventListener('keyup', () => {
+   if ( byId('vocabSuggest') ) { 
+     if ( byId('vocabSuggest').checked ) {     
+     if ( byId('suggest'+inputs.id) ) { 
+       if ( inputs.value.length < 3 ) { 
+         //close suggestion box
+         byId('suggest'+inputs.id).innerHTML = "";
+         byId('suggest'+inputs.id).style.display = "none";   
+       } else { 
+         //make suggestion promise
+         suggestSomething ( inputs.id ).then (function (fulfilled) {         
+            byId('suggest'+inputs.id).innerHTML = fulfilled;
+            byId('suggest'+inputs.id).style.display = 'block';
+          })
+          .catch(function (error) {
+            byId('suggest'+inputs.id).innerHTML = '<div class=errordspmsg>No Suggestions match your criteria ...</div>';
+            byId('suggest'+inputs.id).style.display = 'block';
+            //console.log(error.message);
+          }); 
+       }
+     }
+    }
+   }
+   });
+   
+   inputs.addEventListener( 'blur', () => {
+     if ( byId('suggest'+inputs.id) ) { 
+       byId('suggest'+inputs.id).innerHTML = '';
+       byId('suggest'+inputs.id).style.display = 'none';
+     }
+   });
+
+
+  });
+
+}, false);
+
+var suggestSomething = function ( whichcriteria ) { 
+  return new Promise(function(resolve, reject) {
+    var obj = new Object(); 
+
+    obj['requestingcriteria'] = whichcriteria;
+    obj['speccat'] = byId('fldCritSpcCat').value.trim();
+    obj['site'] = byId('fldCritSite').value.trim();
+    obj['dx'] = byId('fldCritDX').value.trim();
+
+    var passdta = JSON.stringify(obj);         
+    console.log ( passdta );
+
+    httpage.open("POST","{$dp}/suggest-dxdesignation", true)    
+    httpage.setRequestHeader("Authorization","Basic " + btoa(regu+":"+regi));
+
+    httpage.onreadystatechange = function() { 
+      if (httpage.readyState === 4) {
+         if ( parseInt(httpage.status) === 200 ) { 
+           var dta = JSON.parse( httpage.responseText );  
+           resolve( dta['DATA']['desig']+" / "+ dta['DATA']['prp'] + " " +dta['DATA']['segstatus']  );
+        } else { 
+          reject(Error("It broke! "+httpage.responseText ));
+        }
+      }
+    };
+    httpage.send ( passdta );
+
+
+  });
+}
+
+GLOBJAVA;
+  return $rtnThis;
+}
+
     
     
 }

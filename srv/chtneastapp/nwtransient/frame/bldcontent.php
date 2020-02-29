@@ -10,7 +10,80 @@ class bldcontent {
       $this->serveruser = $serverid;
       $this->serverapi = $serverpw;
     }
+
+    function newsearch ( $rqst ) { 
+      $tt = treeTop;
+      $ott = ownerTreeTop;
+      $thisyear = date('Y');
+      $at = genAppFiles;
+      $dp = dataPath;
+
+      $spccatdta = json_decode( callrestapi("GET","{$dp}/global-menu/vocabulary-specimen-category","","","") , true);
+      $spccatmnu = "<div class=sbox><select id=fldCritSpcCat><option value=\"\"> - </option>";
+      foreach ( $spccatdta['DATA'] as $k => $v ) { 
+        $spccatmnu .= "<option value=\"{$v['codevalue']}\">{$v['menuvalue']}</option>";
+      }
+      $spccatmnu .= "</select></div>";
+
+      $prepmdta = json_decode( callrestapi("GET","{$dp}/global-menu/vocabulary-preparation-methods","","","") , true);
+      foreach ( $prepmdta['DATA'] as $k => $v ) { 
+        $prepmmnu .= "<div class=chkBoxHolder><div class=chkBoxLbl>{$v['menuvalue']}</div><div class=\"checkboxThree\"><input type=\"checkbox\" class=\"checkboxThreeInput\" id=\"checkbox{$v['codevalue']}Input\" /><label for=\"checkbox{$v['codevalue']}Input\"></label></div></div>";
+      }
+
+
+
+
+      $rtnthis = <<<PGERTN
+<div id=nwSrchScreenHolder>
+   <div id=criteriaSide>
+
+     <div id=newSearchInstructions>Instructions: </div>
+
+     <div id=criteriaLineOne>
+
+       <div class=critDataLabel id=sectiontitleone>Designation</div>
+       <div id=sugestionsOnDiv> <div class="chkBoxHolder cbhMargin"><div class=chkBoxLbl>Make Vocabulary Suggestions</div><div class="checkboxThree"><input type="checkbox" class="checkboxThreeInput" id="vocabSuggest" CHECKED /><label for="vocabSuggest"></label></div></div> </div>       
+
+       <div class=critElement>
+         <div class=critDataLabel>Specimen Category</div>
+         <div class=critDataElement>{$spccatmnu}</div>
+       </div>
+
+       <div class=critElement>
+         <div class=critDataLabel>Site (Organ/Anatomic)</div>
+         <div class=critDataElement><input type=text id=fldCritSite class=criteriaInputField><div class=suggestionBox id=suggestfldCritSite> </div></div>
+       </div>
+ 
+       <div class=critElement>
+         <div class=critDataLabel>Diagnosis</div>
+         <div class=critDataElement><input type=text id=fldCritDX class=criteriaInputField><div class=suggestionBox id=suggestfldCritDX> </div></div>
+       </div>
+
+    </div>
+
+     <div id=criteriaLineTwo>
+
+       <div class=critElement>
+         <div class=critDataLabel id=sectiontitletwo>Preparation</div>
+         <div class="critDataElement prepoptions">{$prepmmnu}</div>
+       </div>
     
+     </div>
+
+    <div id=criteriaLineButtonBar>
+      <div id=btnSubmit class=zckBtn>Submit</div>
+    </div>
+
+
+   </div>
+   <div id=credentialsSide>
+    DID YOU LOGIN?
+   </div>
+<div>
+PGERTN;
+      return $rtnthis;
+    }
+
     function root ( $rqst ) { 
       $tt = treeTop;
       $ott = ownerTreeTop;
@@ -63,7 +136,6 @@ class bldcontent {
 PGERTN;
       return $rtnthis;
     }    
-    
-    
+     
 }
 
