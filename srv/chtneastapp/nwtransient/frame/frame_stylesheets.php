@@ -33,7 +33,7 @@ class stylesheets {
 @import url('https://fonts.googleapis.com/css?family=Roboto|Roboto+Condensed|Bowlby+One+SC');
 @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
 
-#universalbacker { position: fixed; top: 0; left: 0;  z-index: 100; background: rgba({$this->color_zackgrey},.8); height: 100vh; width: 100vw; display: none; } 
+#universalbacker { position: relative; top: 0; left: 0;  z-index: 100; background: rgba({$this->color_zackgrey},.8); height: 100vh; width: 100vw; display: none; } 
 html { margin: 0; box-sizing: border-box; min-height: 100%; } 
 body { margin: 0; font-family: Roboto;  box-sizing: border-box;  min-height: 100%; margin: 0; margin: 0; position: relative; }
 * { box-sizing: border-box; } 
@@ -81,9 +81,9 @@ body { margin: 0; font-family: Roboto;  box-sizing: border-box;  min-height: 100
     #universalTopBarHolder #topAppBar #applicationListing .appLinkSide { display: none; } 
 
     #chtntoplogo { height: 7vh; width: auto; -webkit-transition-duration: 0.5s; transition-duration: 0.5s; transition: 0.5s; } 
-    #universalTopBarHolder #menuItems { grid-row: 2; margin: 0 10vw 1vh 6vw; display: grid; grid: 6vh / auto-flow;  -webkit-transition-duration: 0.5s; transition-duration: 0.5s; transition: 0.5s; }
+    #universalTopBarHolder #menuItems { grid-row: 2; margin: 0 6vw 1vh 6vw; display: grid; grid: 6vh / auto-flow;  -webkit-transition-duration: 0.5s; transition-duration: 0.5s; transition: 0.5s; }
     #universalTopBarHolder #menuItems .logoholder { width: 4vw; }  
-    #universalTopBarHolder #menuItems .menuLink { display: inline-block; text-decoration: none; outline: none; font-family: 'Roboto'; font-size: 1.6vh; color: rgba({$this->color_dark1},1); padding: 3vh 0 0 0; text-align: center; text-transform: uppercase; -webkit-transition-duration: 0.5s; transition-duration: 0.5s; transition: 0.5s;  }
+    #universalTopBarHolder #menuItems .menuLink { display: inline-block; text-decoration: none; outline: none; font-family: 'Roboto'; font-size: 2.1vh; color: rgba({$this->color_dark1},1); padding: 3vh 0 0 0; text-align: center; text-transform: uppercase; -webkit-transition-duration: 0.5s; transition-duration: 0.5s; transition: 0.5s;  }
     #universalTopBarHolder #menuItems .menuLink:hover { color: rgba({$this->color_highlight},1); }  
 
     #universalTopBarHolder #menuSidePanel { margin: 1vh 6vw 1vh 9vw; } 
@@ -188,9 +188,9 @@ RTNTHIS;
     $rtnthis = <<<RTNTHIS
     body { background: rgba({$this->color_white},1); } 
     #swirlddsp { width: 100%; height: 100%; position: fixed; top: 0; left: 0; z-index: 1; background-repeat: no-repeat; background-attachment: fixed; background: {$chtnmicroscope} no-repeat bottom right; background-size: 68vh; background-position: right 8vw bottom 5vh;  }
-    #introText { margin: 25vh 35vw 3vh 6vw; }
+    #introText { margin: 25vh 35vw 3vh 4vw; }
     #introText #headline { font-family: 'Bowlby One SC'; font-size: 3vh; color: rgba({$this->color_dark1},1); padding: 0 0 3vh 0;    }  
-    #introText #maintext { font-family: Roboto; font-size: 1.8vh;  color: rgba({$this->color_dark1},1); line-height: 1.8em; text-align: justify; padding: 0 0 25vh 0; } 
+    #introText #maintext { font-family: Roboto; font-size: 2vh;  color: rgba({$this->color_dark1},1); line-height: 1.9em; text-align: justify; padding: 0 0 18vh 0; } 
     #copyrightdsp { width: 100%; text-align: center; font-family: 'Roboto Condensed'; font-size: 1.1vh; color: rgba({$this->color_dark},1); background: rgba({$this->color_white},0); position: relative; z-index: 2; padding: 0 0 2vh 0; } 
     #pgeFooter { background: rgba({$this->color_dark1},1); display: grid; grid-template-columns: 69vw 29vw; position: relative; z-index: 2; box-sizing: border-box; }
     #pgeFooter #allMasterLinks { margin: 3vh 0 3vh 6vw; display: grid; grid-template-columns: repeat( 5, 12vw); grid-gap: .2vw; }
@@ -204,15 +204,37 @@ RTNTHIS;
     return $rtnthis;
   }
 
+  
+  function searchresultsfinelandscape() { 
+        require(serverkeys . "/sspdo.zck");
+        $newrqst = explode("/",str_replace("-","", $_SERVER['REQUEST_URI']));     
+        $paraSQL = "SELECT srchrqstid, rqston, rqststr FROM webcapture.nwtransient_searchrequest where srchrqstid = :srchrqstid";
+        $paraRS = $conn->prepare( $paraSQL );
+        $paraRS->execute( array( ':srchrqstid' => $newrqst[2])); 
+        
+        if ( $paraRS->rowCount() < 1 ) {  //BAD REQUEST ID
+        } else {
+    $rtnthis = <<<RTNTHIS
+  
+           
+#waiterDialog {    } 
+   
+            
+RTNTHIS;
+        }
+    return $rtnthis;
+}
+  
+  
   function newsearchfinelandscape() { 
 
     $rtnthis = <<<RTNTHIS
     #nwSrchScreenHolder { margin: 14vh 1vw 0 1vw; display: grid; grid-template-columns: 68vw 29vw; grid-gap: .3vw; }
     #criteriaSide {  } 
 
-    #newSearchInstructions { font-size: 1.6vh; padding: 2vh 0 3vh 0;   } 
+    #newSearchInstructions { font-size: 2vh; padding: 2vh 0 3vh 0;   } 
 
-    input {  box-sizing: border-box; font-family: Roboto; font-size: 1.4vh;color: rgba({$this->color_zackgrey},1); padding: .7vh .3vw; border: 1px solid rgba({$this->color_dark1},1); text-transform: uppercase; }
+    input {  box-sizing: border-box; font-family: Roboto; font-size: 1.8vh;color: rgba({$this->color_zackgrey},1); padding: .7vh .3vw; border: 1px solid rgba({$this->color_dark1},1); text-transform: uppercase; }
     input:focus, input:active {background: rgba({$this->color_lamber},.5); border: 1px solid rgba({$this->color_dblue},.5);  outline: none;  }
 
     .checkboxThree { width: 5vw; height: 3vh; background: rgba( {$this->color_lamber}, 1 ); margin: 0; border-radius: 2px; position: relative; border: 1px solid rgba({$this->color_zackgrey},1); }
@@ -222,13 +244,13 @@ RTNTHIS;
     .checkboxThree input[type=checkbox]:checked + label { left: 2.3vw; background: rgba( {$this->color_darkgreen}, 1 ); }
     .checkboxThree .checkboxThreeInput { visibility: hidden; }
 
-    #criteriaInstructions { padding: 0 0 3vh 0; font-family: Roboto; font-size: 1.4vh;   } 
+    #criteriaInstructions { padding: 0 0 3vh 0; font-family: Roboto; font-size: 1.8vh;   } 
 
     #criteriaLineOne { display: grid; grid-template-columns: 11vw 25vw 32vw; grid-gap: .2vw;      }
-    #criteriaLineOne #sectiontitleone { grid-column: span 3; padding: 0 0 0 0; width: 67vw; font-family: 'Roboto'; font-size: 2vh; color: rgba({$this->color_highlight},1); border-bottom: 1px solid rgba({$this->color_highlight},1);  }
-    #criteriaLineOne #sugestionsOnDiv { grid-column: span 3; margin-bottom: 2vh;} 
+    #criteriaLineOne #sectiontitleone { grid-column: span 3; padding: 0 0 0 0; width: 67vw; font-family: 'Roboto'; font-size: 3vh; color: rgba({$this->color_highlight},1); border-bottom: 1px solid rgba({$this->color_highlight},1);  }
+    #criteriaLineOne #sugestionsOnDiv { grid-column: span 3; margin-bottom: 2vh; display: none;} 
     #criteriaLineTwo { width: 33vw; margin: 0 0 0 0; }
-    #criteriaLineTwo #sectiontitletwo {  padding: 5vh 0 0 0; width: 67vw; font-family: 'Roboto'; font-size: 2vh; color: rgba({$this->color_highlight},1); border-bottom: 1px solid rgba({$this->color_highlight},1); margin-bottom: 2vh;} 
+    #criteriaLineTwo #sectiontitletwo {  padding: 5vh 0 0 0; width: 67vw; font-family: 'Roboto'; font-size: 3vh; color: rgba({$this->color_highlight},1); border-bottom: 1px solid rgba({$this->color_highlight},1); margin-bottom: 2vh;} 
     #criteriaLineButtonBar { padding: 6vh 30vw; } 
 
     .zckBtn { display: block; border: 1px solid rgba({$this->color_dark1},1); width: 5vw; text-align: center; padding: .8vh .5vw; background: rgba({$this->color_dark1},1); color: rgba({$this->color_white},1); font-family: 'Roboto'; font-size: 1.4vh; font-weight: bold; -webkit-transition-duration: 0.5s; transition-duration: 0.5s; transition: 0.5s; }
@@ -237,17 +259,17 @@ RTNTHIS;
     .critDataElement { position: relative; } 
     .suggestionBox { position: absolute; height: 13vh; overflow: auto; padding: .2vh .2vw; border: 1px solid rgba({$this->color_dark1},1); width: 100%; background: rgba({$this->color_white},1); margin-top: 2px; display: none; z-index: 5 } 
 
-    .prepoptions { display: grid; grid-template-columns: repeat( 6, 5vw); grid-gap: .2vw;  } 
+    .prepoptions { display: grid; grid-template-columns: repeat( 6, 5vw); grid-gap: .8vw;  } 
     .chkBoxHolder { width: 7vw; }
-    .cbhMargin { margin: 0 3vw 0 0; display: grid; grid-template-columns: 11vw 5vw; grid-gap: .1vw; }
-    .chkBoxLbl { font-family: Roboto; font-size: 1.3vh; color: rgba({$this->color_dark1},1); font-weight: bold; padding: .3vh 0;   }  
+    .cbhMargin { margin: 0 3vw 0 0; display: grid; grid-template-columns: 8vw 5vw; grid-gap: .1vw; }
+    .chkBoxLbl { font-family: Roboto; font-size: 1.5vh; color: rgba({$this->color_dark1},1); font-weight: bold; padding: .3vh 0;   }  
 
-    select { background-color: rgba({$this->color_white},1); color: rgba({$this->color_dark1},1); padding: .6vh .3vw; width: 20vw; border: none; font-size: 1.4vh;  -webkit-appearance: button; appearance: button; outline: none; border: 1px solid rgba({$this->color_dark1},1); }
+    select { background-color: rgba({$this->color_white},1); color: rgba({$this->color_dark1},1); padding: .6vh .3vw; width: 20vw; border: none; font-size: 1.8vh;  -webkit-appearance: button; appearance: button; outline: none; border: 1px solid rgba({$this->color_dark1},1); }
     .sbox::before { font-family: 'Roboto Condensed'; position: absolute; top: 0; right: 0; width: 20%; height: 100%; text-align: center; font-size: 1.2vh; line-height: 45px; color: rgba(255, 255, 255, 0.5); background-color: rgba(255, 255, 255, 0.1); pointer-events: none; }
     .sbox:hover::before { color: rgba(255, 255, 255, 0.6); background-color: rgba(255, 255, 255, 0.2); }
     .sbox select option { padding: .5vh .3vw; }  
 
-    .critDataLabel { font-family: 'Roboto'; font-size: 1.3vh; font-weight: bold; text-decoration: none; color: rgba({$this->color_dark1},1);    } 
+    .critDataLabel { font-family: 'Roboto'; font-size: 1.5vh; font-weight: bold; text-decoration: none; color: rgba({$this->color_dark1},1);    } 
 
     #fldCritSpcCat { width: 11vw;  }
     #fldCritSite { width: 25vw;  }

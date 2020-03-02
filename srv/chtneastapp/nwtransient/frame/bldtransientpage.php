@@ -21,9 +21,9 @@ class pagebuilder {
 
   //PAGE NAME MUST BE REGISTERED IN THIS ARRAY - COULD DO A METHOD SEARCH - BUT I LIKE THE CONTROL OF NOT ALLOWING A PAGE THAT IS NOT READY FOR DISPLAY
   //ADD ALL PAGES TO SECURITYEXCEPTION
-  private $registeredPages    = array('root','newsearch','howtousetidal','contactus');  
+  private $registeredPages    = array('root','newsearch','howtousetidal','contactus','searchresults');  
   //THE SECURITY EXCPETIONS ARE THOSE PAGES THAT DON'T REQUIRE USER RIGHTS TO ACCESS
-  private $securityExceptions = array('root','newsearch','howtousetidal','contactus');
+  private $securityExceptions = array('root','newsearch','howtousetidal','contactus','searchresults');
 
 function __construct() { 		  
   $args = func_get_args();   

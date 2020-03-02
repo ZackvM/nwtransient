@@ -51,6 +51,27 @@ class javascriptr {
       }
       return req;
     }
+    
+    function universalAJAX(methd, url, passedDataJSON, callbackfunc, dspBacker) { 
+      if (dspBacker === 1) { 
+        byId('universalbacker').style.display = 'block';
+      }
+      var rtn = new Object();
+      var grandurl = dtaPath+url;
+      httpage.open(methd, grandurl, true); 
+      httpage.setRequestHeader("Authorization","Basic " + btoa(regu+":"+regi));
+      httpage.onreadystatechange = function() { 
+      if (httpage.readyState === 4) { 
+        rtn['responseCode'] = httpage.status;
+        rtn['responseText'] = httpage.responseText;
+        if (parseInt(dspBacker) < 2) { 
+          byId('universalbacker').style.display = 'none';
+        }
+        callbackfunc(rtn);
+      }
+     };
+     httpage.send(passedDataJSON);
+    }
 
     window.onscroll = function() {scrollFunction()};
 
@@ -66,10 +87,55 @@ class javascriptr {
 
 GLOBJAVA;
   return $rtnThis;
-}        
+}       
+
+
+function searchresults ( $rqst ) { 
+  $dp = dataPath;
+  $tt = treeTop;
+  $rtnThis = "";
+  if ( $rqst[2] !== "") {  
+        require(serverkeys . "/sspdo.zck");      
+        $newrqst = explode("/",str_replace("-","", $_SERVER['REQUEST_URI']));     
+        $paraSQL = "SELECT srchrqstid, rqston, rqststr FROM webcapture.nwtransient_searchrequest where srchrqstid = :srchrqstid";
+        $paraRS = $conn->prepare( $paraSQL );
+        $paraRS->execute( array( ':srchrqstid' => $newrqst[2])); 
+        
+        if ( $paraRS->rowCount() > 0 ) {        
+          $rtnThis = <<<GLOBJAVA
+
+   document.addEventListener('DOMContentLoaded', function() {
+       
+        runThisRequest (  rqststr  ).then (function (fulfilled) {         
+            //byId('suggest'+inputs.id).innerHTML = fulfilled;
+            //byId('suggest'+inputs.id).style.display = 'block';
+          })
+          .catch(function (error) {
+            //byId('suggest'+inputs.id).innerHTML = '<div class=errordspmsg>No Suggestions ...</div>';
+            //byId('suggest'+inputs.id).style.display = 'block';
+            console.log(error.message);
+          }); 
+                  
+    });                  
+    
+var runThisRequest = function ( whichcriteria ) { 
+  return new Promise(function(resolve, reject) {
+          
+          //resolve( dta['DATA']  );
+
+          reject(Error("It broke! "));                  
+  });
+}
+                  
+GLOBJAVA;
+        }
+  }
+  return $rtnThis;    
+}
 
 function newsearch ( $rqst ) {
   $dp = dataPath;
+  $tt = treeTop;
 
   $rtnThis = <<<GLOBJAVA
 
@@ -134,11 +200,26 @@ function submitTidalRequest() {
   obj['diagnosis'] = byId('fldCritDX').value;
   obj['preparations'] = JSON.stringify(preparations);
   var passdta = JSON.stringify(obj);         
-
   console.log( obj );
-
-
+  var mlURL = "/commit-tidal-request";
+  universalAJAX("POST",mlURL,passdta,answerSubmitTidalRequest,2);          
 }
+          
+function answerSubmitTidalRequest ( rtnData ) { 
+   if (parseInt(rtnData['responseCode']) !== 200) { 
+     var msgs = JSON.parse(rtnData['responseText']);
+     var dspMsg = ""; 
+     msgs['MESSAGE'].forEach(function(element) { 
+       dspMsg += "\\n - "+element;
+     });
+     //ERROR MESSAGE HERE
+     alert("ERROR:\\n"+dspMsg);
+   } else {
+     var rsp = JSON.parse(rtnData['responseText']); 
+     window.location.href = "{$tt}/search-results/"+rsp['DATA'];
+          
+   }                  
+}          
 
 var suggestSomething = function ( whichcriteria ) { 
   return new Promise(function(resolve, reject) {
@@ -165,8 +246,6 @@ var suggestSomething = function ( whichcriteria ) {
       }
     };
     httpage.send ( passdta );
-
-
   });
 }
 

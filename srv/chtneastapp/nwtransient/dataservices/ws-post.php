@@ -35,6 +35,34 @@ function __construct() {
 }
 
 class datadoers {
+    
+   function committidalrequest ( $request, $passdata ) { 
+     $responseCode = 400;
+     $rows = array();
+     $msgArr = array(); 
+     $errorInd = 0;
+     $itemsfound = 0;
+     require(serverkeys . "/sspdo.zck");
+     session_start(); 
+     $sessid = session_id();      
+     $pdta = json_decode($passdata, true); 
+     $at = genAppFiles;
+     //TODO:  DATA CHECKS
+     $rqstCaptureSQL = "insert into webcapture.nwtransient_searchrequest (srchrqstid, rqston, rqstby_user, rqstby_phpid, rqststr) values(:srchrqstid, now(), :rqstby_user, :rqstby_phpid, :rqststr)"; 
+     $rqstCaptureRS = $conn->prepare( $rqstCaptureSQL );
+     $srchrqst = generateRandomString(15);
+     if ( isset ( $_SESSION['loggedon']) ) { 
+         $rqstCaptureRS->execute(array( ':srchrqstid' => $srchrqst, ':rqstby_user' => 'USER GOES HERE', ':rqstby_phpid' => $sessid, ':rqststr' => $passdata  ));
+     } else { 
+         $rqstCaptureRS->execute(array( ':srchrqstid' => $srchrqst, ':rqstby_user' => '', ':rqstby_phpid' => $sessid, ':rqststr' => $passdata  ));
+     }
+     $dta = $srchrqst;
+     $responseCode = 200;
+     $msg = $msgArr;
+     $rows['statusCode'] = $responseCode; 
+     $rows['data'] = array( 'RESPONSECODE' => $responseCode, 'MESSAGE' => $msg, 'ITEMSFOUND' => $itemsfound, 'DATA' => $dta);
+     return $rows;        
+    }
 
    function suggestdxdesignation ( $request, $passdata ) { 
      $responseCode = 400;
@@ -86,11 +114,6 @@ class datadoers {
            }
            break;
        }
-
-
-
-
-
 
      }
      $msg = $msgArr;

@@ -11,6 +11,39 @@ class bldcontent {
       $this->serverapi = $serverpw;
     }
 
+    function searchresults ( $rqst ) { 
+        require(serverkeys . "/sspdo.zck");
+        $newrqst = explode("/",str_replace("-","", $_SERVER['REQUEST_URI']));     
+        $paraSQL = "SELECT srchrqstid, rqston, rqststr FROM webcapture.nwtransient_searchrequest where srchrqstid = :srchrqstid";
+        $paraRS = $conn->prepare( $paraSQL );
+        $paraRS->execute( array( ':srchrqstid' => $newrqst[2])); 
+        
+        if ( $paraRS->rowCount() < 1 ) { 
+            //POP ERROR
+        $rtnthis = <<<PGERTN
+             <h1>NO PARAMETER CRITERIA FOUND FOR GIVEN IDENTIFIER
+PGERTN;
+        } else { 
+          $para = $paraRS->fetch(PDO::FETCH_ASSOC);   
+          $rtnthis = <<<PGERTN
+<script>
+    var srchrqstid = "{$para['srchrqstid']}";
+    var rqston = "{$para['rqston']}";
+    var rqststr = {$para['rqststr']};                  
+</script>
+
+<div id=waiterDialog>
+    Waiting On System ... 
+    
+</div>    
+                  
+PGERTN;
+        }        
+        return $rtnthis;
+    }
+    
+    
+    
     function newsearch ( $rqst ) { 
       $tt = treeTop;
       $ott = ownerTreeTop;
@@ -74,7 +107,7 @@ class bldcontent {
 
    </div>
    <div id=credentialsSide>
-    DID YOU LOGIN?
+    &nbsp;
    </div>
 <div>
 PGERTN;
@@ -93,7 +126,7 @@ PGERTN;
 <div id=introText>
 
   <div id=headline>CHTN's Transient Inventory Data Access Launchpad (TIDAL)</div>
-  <div id=maintext>Thank you for using the Cooperative Human Tissue Network's (CHTN) <b>Transient Inventory Data Access Launchpad (TIDAL)</b> Application at the Eastern Division. The CHTN is a prospective procurement service that assists the scientific community in obtaining biosamples for research. Even though all projects utilizing the CHTN must be prospective procurement in nature, all CHTN divisions have transient inventory on hand. This tool allows CHTN Investigators to conduct searches on the transient inventories held at CHTN locations through the CHTN's federated database.  To receive biosamples from the CHTN you must have an active, accepted protocol with a CHTN division. If you are not already a CHTN Investigator, you can apply to the CHTN by downloading the <a href="https://www.chtn.org/d/chtn-application.pdf" target="_new">application here</a> or by contacting the CHTN (440) 477-5952.
+  <div id=maintext>Thank you for using the Cooperative Human Tissue Network's (CHTN) <b>Transient Inventory Data Access Launchpad (TIDAL)</b> Application at the Eastern Division. The CHTN is a prospective procurement service that assists the scientific community in obtaining biosamples for research. Even though all projects utilizing the CHTN must be prospective procurement in nature, all CHTN divisions have transient inventory on hand. This tool allows CHTN Investigators to conduct searches on the transient inventories held at CHTN locations through the CHTN's federated database.  To receive biosamples from the CHTN you must have an active, accepted protocol with a CHTN division. If you are not already a CHTN Investigator, you can apply to the CHTN by downloading the <a href="https://www.chtn.org/d/chtn-application.pdf" target="_new">application here</a> or by contacting the CHTN Eastern Divison (215) 662-4570.
 <p>After conducting a TIDAL search, you can request biosample(s) in which you are interested (You must have an active protocol and the biosamples must be verified for use before receipt).  
 </div>
 
