@@ -49,9 +49,50 @@ class datadoers {
      $at = genAppFiles;
      //{"requestingcriteria":"fldCritSite","speccat":"","site":"thy","dx":""}
 
-     $msgArr[] = "ZZZAAAACCCCKKKKK";
+     if ( trim($pdta['requestingcriteria']) !== "" ) {
+
+       switch ( trim($pdta['requestingcriteria']) ) {
+         case 'fldCritSite':
+         
+           if ( trim($pdta['site']) !== "" ) { 
+             $paralist = array(); 
+             $baseSQL = "SELECT distinct ifnull(anatomicsite,'') as site FROM masterrecord.ut_procure_biosample where  ifnull(anatomicSite,'') <> '' and anatomicSite like :sitesite order by 1";
+             $baseRS = $conn->prepare( $baseSQL );
+             $baseRS->execute(array( ':sitesite' => trim($pdta['site']) . '%'));
+             $itemsfound = $baseRS->rowCount();
+             $dta = "<div class=vocabularyCount>Terms found: {$itemsfound}</div>";
+             while ( $r = $baseRS->fetch(PDO::FETCH_ASSOC)) { 
+                $dta .= "<div class=vocabularyDsp>{$r['site']}</div>";
+             }
+             if ( (int)$itemsfound > 0 ) { 
+                 $responseCode = 200;
+             }
+           }
+           break;
+         case 'fldCritDX':
+           if ( trim($pdta['dx']) !== "" ) { 
+             $paralist = array(); 
+             $baseSQL = "SELECT distinct ifnull(diagnosis,'') as dx FROM masterrecord.ut_procure_biosample where  ifnull(diagnosis,'') <> '' and diagnosis like :sitesite order by 1";
+             $baseRS = $conn->prepare( $baseSQL );
+             $baseRS->execute(array( ':sitesite' => trim($pdta['dx']) . '%'));
+             $itemsfound = $baseRS->rowCount();
+             $dta = "<div class=vocabularyCount>Terms found: {$itemsfound}</div>";
+             while ( $r = $baseRS->fetch(PDO::FETCH_ASSOC)) { 
+                $dta .= "<div class=vocabularyDsp>{$r['dx']}</div>";
+             }
+             if ( (int)$itemsfound > 0 ) { 
+                 $responseCode = 200;
+             }
+           }
+           break;
+       }
 
 
+
+
+
+
+     }
      $msg = $msgArr;
      $rows['statusCode'] = $responseCode; 
      $rows['data'] = array( 'RESPONSECODE' => $responseCode, 'MESSAGE' => $msg, 'ITEMSFOUND' => $itemsfound, 'DATA' => $dta);

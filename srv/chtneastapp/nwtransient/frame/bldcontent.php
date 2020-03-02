@@ -27,35 +27,32 @@ class bldcontent {
 
       $prepmdta = json_decode( callrestapi("GET","{$dp}/global-menu/vocabulary-preparation-methods","","","") , true);
       foreach ( $prepmdta['DATA'] as $k => $v ) { 
-        $prepmmnu .= "<div class=chkBoxHolder><div class=chkBoxLbl>{$v['menuvalue']}</div><div class=\"checkboxThree\"><input type=\"checkbox\" class=\"checkboxThreeInput\" id=\"checkbox{$v['codevalue']}Input\" /><label for=\"checkbox{$v['codevalue']}Input\"></label></div></div>";
+        $prepmmnu .= "<div class=chkBoxHolder><div class=chkBoxLbl>{$v['menuvalue']}</div><div class=\"checkboxThree\"><input type=\"checkbox\" class=\"checkboxThreeInput\" id=\"checkbox-{$v['codevalue']}\" /><label for=\"checkbox-{$v['codevalue']}\"></label></div></div>";
       }
-
-
-
 
       $rtnthis = <<<PGERTN
 <div id=nwSrchScreenHolder>
    <div id=criteriaSide>
 
-     <div id=newSearchInstructions>Instructions: </div>
+     <div id=newSearchInstructions>Instructions: Fill out the form below then click 'Submit'.  For a more indepth tutorial, click the 'Using Tidal' menu option above or click a field label. </div>
 
      <div id=criteriaLineOne>
 
        <div class=critDataLabel id=sectiontitleone>Designation</div>
-       <div id=sugestionsOnDiv> <div class="chkBoxHolder cbhMargin"><div class=chkBoxLbl>Make Vocabulary Suggestions</div><div class="checkboxThree"><input type="checkbox" class="checkboxThreeInput" id="vocabSuggest" CHECKED /><label for="vocabSuggest"></label></div></div> </div>       
+       <div id=sugestionsOnDiv> <div class="chkBoxHolder cbhMargin"><div class=chkBoxLbl>Make Vocabulary Suggestions</div><div class="checkboxThree"><input type="checkbox" class="checkboxThreeInput" id="vocabSuggest" /><label for="vocabSuggest"></label></div></div> </div>       
 
        <div class=critElement>
-         <div class=critDataLabel>Specimen Category</div>
+         <a href="{$tt}/how-to-use-tidal#field-specimen-category" class=critDataLabel>Specimen Category</a>
          <div class=critDataElement>{$spccatmnu}</div>
        </div>
 
        <div class=critElement>
-         <div class=critDataLabel>Site (Organ/Anatomic)</div>
+         <a href="{$tt}/how-to-use-tidal#field-site" class=critDataLabel>Site (Organ/Anatomic)</a>
          <div class=critDataElement><input type=text id=fldCritSite class=criteriaInputField><div class=suggestionBox id=suggestfldCritSite> </div></div>
        </div>
  
        <div class=critElement>
-         <div class=critDataLabel>Diagnosis</div>
+         <a href="{$tt}/how-to-use-tidal#field-diagnosis" class=critDataLabel>Diagnosis</a>
          <div class=critDataElement><input type=text id=fldCritDX class=criteriaInputField><div class=suggestionBox id=suggestfldCritDX> </div></div>
        </div>
 

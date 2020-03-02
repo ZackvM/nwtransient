@@ -8,6 +8,7 @@ class stylesheets {
   public $color_dark1 = "0,32,113";
   public $color_highlight = "100,149,237";
   public $color_offwhite = "224, 224, 224";
+  public $color_grey = "160,160,160";
 
   public $color_goldenrod = "156,118,22";
   public $color_lamber = "255,248,225";
@@ -36,6 +37,8 @@ class stylesheets {
 html { margin: 0; box-sizing: border-box; min-height: 100%; } 
 body { margin: 0; font-family: Roboto;  box-sizing: border-box;  min-height: 100%; margin: 0; margin: 0; position: relative; }
 * { box-sizing: border-box; } 
+
+
 
 /*   TOUCH SCREEN   */
 @media (pointer: coarse) {
@@ -207,6 +210,8 @@ RTNTHIS;
     #nwSrchScreenHolder { margin: 14vh 1vw 0 1vw; display: grid; grid-template-columns: 68vw 29vw; grid-gap: .3vw; }
     #criteriaSide {  } 
 
+    #newSearchInstructions { font-size: 1.6vh; padding: 2vh 0 3vh 0;   } 
+
     input {  box-sizing: border-box; font-family: Roboto; font-size: 1.4vh;color: rgba({$this->color_zackgrey},1); padding: .7vh .3vw; border: 1px solid rgba({$this->color_dark1},1); text-transform: uppercase; }
     input:focus, input:active {background: rgba({$this->color_lamber},.5); border: 1px solid rgba({$this->color_dblue},.5);  outline: none;  }
 
@@ -230,7 +235,7 @@ RTNTHIS;
     .zckBtn:hover { cursor: pointer; background: rgba({$this->color_highlight},1); }
 
     .critDataElement { position: relative; } 
-    .suggestionBox { position: absolute; height: 10vh; border: 1px solid rgba({$this->color_dark1},1); width: 100%; background: rgba({$this->color_white},1); margin-top: 2px; display: none; } 
+    .suggestionBox { position: absolute; height: 13vh; overflow: auto; padding: .2vh .2vw; border: 1px solid rgba({$this->color_dark1},1); width: 100%; background: rgba({$this->color_white},1); margin-top: 2px; display: none; z-index: 5 } 
 
     .prepoptions { display: grid; grid-template-columns: repeat( 6, 5vw); grid-gap: .2vw;  } 
     .chkBoxHolder { width: 7vw; }
@@ -242,7 +247,7 @@ RTNTHIS;
     .sbox:hover::before { color: rgba(255, 255, 255, 0.6); background-color: rgba(255, 255, 255, 0.2); }
     .sbox select option { padding: .5vh .3vw; }  
 
-    .critDataLabel { font-family: 'Roboto'; font-size: 1.3vh; font-weight: bold;     } 
+    .critDataLabel { font-family: 'Roboto'; font-size: 1.3vh; font-weight: bold; text-decoration: none; color: rgba({$this->color_dark1},1);    } 
 
     #fldCritSpcCat { width: 11vw;  }
     #fldCritSite { width: 25vw;  }
@@ -250,7 +255,15 @@ RTNTHIS;
     #fldCritDX { width: 30vw; } 
     #suggestfldCritDX { width: 30vw; } 
 
-    #credentialsSide { border: 1px solid #000; } 
+    .vocabularyCount { font-size: 1.1vh; text-align: right; }
+    .vocabularyDsp { font-size: 1.4vh; color: rgba({$this->color_dark1},1); padding: 8px 5px;   }
+    .vocabularyDsp:nth-child(odd) { background: rgba({$this->color_grey},.2); }
+
+
+
+
+    #credentialsSide { border-left: 1px solid #000; }
+ 
 
 RTNTHIS;
     return $rtnthis;

@@ -11,6 +11,34 @@ class pagecontent {
       $this->serverapi = $serverpw;
     }
 
+    function contactus ( $rqst ) {
+      $tt = treeTop;      
+      $at = genAppFiles;
+      $cb = new bldcontent();  
+      //$pageData = $cb->newsearch( $rqst );
+$pge = <<<PAGECONTENT
+<div id=mainPageDiv>
+  {$pageData} 
+</div>
+PAGECONTENT;
+      return $pge;
+    }
+
+    function howtousetidal ( $rqst ) {
+      $tt = treeTop;      
+      $at = genAppFiles;
+      $cb = new bldcontent();  
+      //$pageData = $cb->newsearch( $rqst );
+$pge = <<<PAGECONTENT
+<div id=mainPageDiv>
+  {$pageData} 
+</div>
+PAGECONTENT;
+      return $pge;
+
+
+    }
+
     function newsearch ( $rqst ) { 
       $tt = treeTop;      
       $at = genAppFiles;

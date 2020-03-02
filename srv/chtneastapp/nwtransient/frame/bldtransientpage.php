@@ -21,9 +21,9 @@ class pagebuilder {
 
   //PAGE NAME MUST BE REGISTERED IN THIS ARRAY - COULD DO A METHOD SEARCH - BUT I LIKE THE CONTROL OF NOT ALLOWING A PAGE THAT IS NOT READY FOR DISPLAY
   //ADD ALL PAGES TO SECURITYEXCEPTION
-  private $registeredPages    = array('root','newsearch');  
+  private $registeredPages    = array('root','newsearch','howtousetidal','contactus');  
   //THE SECURITY EXCPETIONS ARE THOSE PAGES THAT DON'T REQUIRE USER RIGHTS TO ACCESS
-  private $securityExceptions = array('root','newsearch');
+  private $securityExceptions = array('root','newsearch','howtousetidal','contactus');
 
 function __construct() { 		  
   $args = func_get_args();   
@@ -71,6 +71,7 @@ function getPageElements($whichpage, $rqststr) {
 
     $elArr['controlbars']  =   (method_exists($ct,'mastercontrols') ? $ct->mastercontrols( $whichpage ) : "" );
     $elArr['menu']         =   (method_exists($ct,'mastertopmenu') ? $ct->mastertopmenu( $whichpage, $rqststr ) : "" );
+    $elArr['menu']        .=   (method_exists($oe,'modalbackbuilder') ? $oe->modalbackbuilder( $whichpage, $rqststr ) : "" );
 
   //PAGE CONTENT ELEMENTS  ------------------------------------
   //MAKE SURE USER IS ALLOWED ACCESS TO THE PAGE 

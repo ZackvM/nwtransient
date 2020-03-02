@@ -75,6 +75,11 @@ function newsearch ( $rqst ) {
 
 document.addEventListener('DOMContentLoaded', function() {
 
+  byId('btnSubmit').addEventListener ( 'click', () =>  {
+    submitTidalRequest();
+  });
+
+
   var el = document.querySelectorAll(".criteriaInputField");
   el.forEach((inputs) => {
    inputs.addEventListener('keyup', () => {
@@ -92,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function() {
             byId('suggest'+inputs.id).style.display = 'block';
           })
           .catch(function (error) {
-            byId('suggest'+inputs.id).innerHTML = '<div class=errordspmsg>No Suggestions match your criteria ...</div>';
+            byId('suggest'+inputs.id).innerHTML = '<div class=errordspmsg>No Suggestions ...</div>';
             byId('suggest'+inputs.id).style.display = 'block';
             //console.log(error.message);
           }); 
@@ -108,11 +113,32 @@ document.addEventListener('DOMContentLoaded', function() {
        byId('suggest'+inputs.id).style.display = 'none';
      }
    });
-
-
   });
 
 }, false);
+
+function submitTidalRequest() { 
+
+ byId('universalbacker').style.display = 'block';
+ var preparations = []; 
+  var chk = document.querySelectorAll(".checkboxThreeInput");
+  chk.forEach((chkbox) => {
+    if (chkbox.checked) {
+      preparations.push(chkbox.id);
+    }
+  });
+
+  var obj = new Object(); 
+  obj['specimenCategory'] = byId('fldCritSpcCat').value;
+  obj['site'] = byId('fldCritSite').value;
+  obj['diagnosis'] = byId('fldCritDX').value;
+  obj['preparations'] = JSON.stringify(preparations);
+  var passdta = JSON.stringify(obj);         
+
+  console.log( obj );
+
+
+}
 
 var suggestSomething = function ( whichcriteria ) { 
   return new Promise(function(resolve, reject) {
@@ -124,7 +150,6 @@ var suggestSomething = function ( whichcriteria ) {
     obj['dx'] = byId('fldCritDX').value.trim();
 
     var passdta = JSON.stringify(obj);         
-    console.log ( passdta );
 
     httpage.open("POST","{$dp}/suggest-dxdesignation", true)    
     httpage.setRequestHeader("Authorization","Basic " + btoa(regu+":"+regi));
@@ -133,7 +158,7 @@ var suggestSomething = function ( whichcriteria ) {
       if (httpage.readyState === 4) {
          if ( parseInt(httpage.status) === 200 ) { 
            var dta = JSON.parse( httpage.responseText );  
-           resolve( dta['DATA']['desig']+" / "+ dta['DATA']['prp'] + " " +dta['DATA']['segstatus']  );
+           resolve( dta['DATA']  );
         } else { 
           reject(Error("It broke! "+httpage.responseText ));
         }
