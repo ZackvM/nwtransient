@@ -33,10 +33,10 @@ class stylesheets {
 @import url('https://fonts.googleapis.com/css?family=Roboto|Roboto+Condensed|Bowlby+One+SC');
 @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
 
-#universalbacker { position: relative; top: 0; left: 0;  z-index: 100; background: rgba({$this->color_zackgrey},.8); height: 100vh; width: 100vw; display: none; } 
 html { margin: 0; box-sizing: border-box; min-height: 100%; } 
 body { margin: 0; font-family: Roboto;  box-sizing: border-box;  min-height: 100%; margin: 0; margin: 0; position: relative; }
 * { box-sizing: border-box; } 
+#universalbacker { position: relative; top: 0; left: 0;  z-index: 100; background: rgba({$this->color_zackgrey},.8); height: 100vh; width: 100vw; display: none; } 
 
 
 
@@ -208,17 +208,16 @@ RTNTHIS;
   function searchresultsfinelandscape() { 
         require(serverkeys . "/sspdo.zck");
         $newrqst = explode("/",str_replace("-","", $_SERVER['REQUEST_URI']));     
-        $paraSQL = "SELECT srchrqstid, rqston, rqststr FROM webcapture.nwtransient_searchrequest where srchrqstid = :srchrqstid";
+        $paraSQL = "SELECT srchrqstid, rqston, rqststr FROM tidal.searchrequest where srchrqstid = :srchrqstid";
         $paraRS = $conn->prepare( $paraSQL );
         $paraRS->execute( array( ':srchrqstid' => $newrqst[2])); 
         
         if ( $paraRS->rowCount() < 1 ) {  //BAD REQUEST ID
         } else {
     $rtnthis = <<<RTNTHIS
-  
-           
-#waiterDialog {    } 
-   
+ 
+body { background: rgba({$this->color_white},1); position: relative; } 
+#waiterDialog { width: 100%; height: 100%; text-align: center;     }    
             
 RTNTHIS;
         }
@@ -229,7 +228,7 @@ RTNTHIS;
   function newsearchfinelandscape() { 
 
     $rtnthis = <<<RTNTHIS
-    #nwSrchScreenHolder { margin: 14vh 1vw 0 1vw; display: grid; grid-template-columns: 68vw 29vw; grid-gap: .3vw; }
+    #nwSrchScreenHolder { margin: 14vh 1vw 0 1vw;  }
     #criteriaSide {  } 
 
     #newSearchInstructions { font-size: 2vh; padding: 2vh 0 3vh 0;   } 
@@ -237,21 +236,22 @@ RTNTHIS;
     input {  box-sizing: border-box; font-family: Roboto; font-size: 1.8vh;color: rgba({$this->color_zackgrey},1); padding: .7vh .3vw; border: 1px solid rgba({$this->color_dark1},1); text-transform: uppercase; }
     input:focus, input:active {background: rgba({$this->color_lamber},.5); border: 1px solid rgba({$this->color_dblue},.5);  outline: none;  }
 
-    .checkboxThree { width: 5vw; height: 3vh; background: rgba( {$this->color_lamber}, 1 ); margin: 0; border-radius: 2px; position: relative; border: 1px solid rgba({$this->color_zackgrey},1); }
-    .checkboxThree:before { content: 'Yes'; position: absolute; top: .7vh; left: .5vw; height: .1vh; color: rgba({$this->color_darkgreen},1 ); font-family: 'Roboto'; font-size: 1.4vh; }
-    .checkboxThree:after  { content: 'No'; position: absolute; top: .7vh; left: 3.2vw; height: .1vh; color: rgba({$this->color_bred},1); font-family: 'Roboto'; font-size: 1.4vh; }
+    .checkboxThree { width: 7vw; height: 3vh; background: rgba( {$this->color_lamber}, 1 ); margin: 0; border-radius: 2px; position: relative; border: 1px solid rgba({$this->color_zackgrey},1); }
+    .checkboxThree:before { content: 'Yes'; position: absolute; top: .7vh; left: 1vw; height: .1vh; color: rgba({$this->color_darkgreen},1 ); font-family: 'Roboto'; font-size: 1.4vh; }
+    .checkboxThree:after  { content: 'No'; position: absolute; top: .7vh; right: 1vw; height: .1vh; color: rgba({$this->color_bred},1); font-family: 'Roboto'; font-size: 1.4vh; }
     .checkboxThree label  { display: block; width: 2vw; height: 1.7vh; border-radius: 50px; transition: all .5s ease; cursor: pointer; position: absolute; top: .7vh; z-index: 1; left: .5vw; background: rgba( {$this->color_zackgrey}, 1  ); }
-    .checkboxThree input[type=checkbox]:checked + label { left: 2.3vw; background: rgba( {$this->color_darkgreen}, 1 ); }
+    .checkboxThree input[type=checkbox]:checked + label { left: 4.5vw; background: rgba( {$this->color_darkgreen}, 1 ); }
     .checkboxThree .checkboxThreeInput { visibility: hidden; }
 
-    #criteriaInstructions { padding: 0 0 3vh 0; font-family: Roboto; font-size: 1.8vh;   } 
+    #criteriaInstructions { padding: 0 0 1vh 0; font-family: Roboto; font-size: 1.8vh; } 
 
-    #criteriaLineOne { display: grid; grid-template-columns: 11vw 25vw 32vw; grid-gap: .2vw;      }
-    #criteriaLineOne #sectiontitleone { grid-column: span 3; padding: 0 0 0 0; width: 67vw; font-family: 'Roboto'; font-size: 3vh; color: rgba({$this->color_highlight},1); border-bottom: 1px solid rgba({$this->color_highlight},1);  }
-    #criteriaLineOne #sugestionsOnDiv { grid-column: span 3; margin-bottom: 2vh; display: none;} 
+    #criteriaLineOne { display: grid; grid-template-columns: 15vw 30vw 35vw; grid-gap: .2vw; margin: 2vh 0 0 0;     }
+    #criteriaLineOne #sectiontitleone { grid-column: span 3; padding: 0 0 0 0; margin: 0 0 1vh 0; width: 81vw; font-family: 'Roboto'; font-size: 3vh; color: rgba({$this->color_highlight},1); border-bottom: 1px solid rgba({$this->color_highlight},1);  }
+    #criteriaLineOne #sugestionsOnDiv { grid-column: span 3; margin-bottom: 2vh; display: none; } 
+
     #criteriaLineTwo { width: 33vw; margin: 0 0 0 0; }
-    #criteriaLineTwo #sectiontitletwo {  padding: 5vh 0 0 0; width: 67vw; font-family: 'Roboto'; font-size: 3vh; color: rgba({$this->color_highlight},1); border-bottom: 1px solid rgba({$this->color_highlight},1); margin-bottom: 2vh;} 
-    #criteriaLineButtonBar { padding: 6vh 30vw; } 
+    #criteriaLineTwo #sectiontitletwo { padding: 3vh 0 0 0; width: 81vw; font-family: 'Roboto'; font-size: 3vh; color: rgba({$this->color_highlight},1); border-bottom: 1px solid rgba({$this->color_highlight},1); margin-bottom: 2vh;} 
+    #criteriaLineButtonBar { padding: 6vh 40vw; text-align: center;  } 
 
     .zckBtn { display: block; border: 1px solid rgba({$this->color_dark1},1); width: 5vw; text-align: center; padding: .8vh .5vw; background: rgba({$this->color_dark1},1); color: rgba({$this->color_white},1); font-family: 'Roboto'; font-size: 1.4vh; font-weight: bold; -webkit-transition-duration: 0.5s; transition-duration: 0.5s; transition: 0.5s; }
     .zckBtn:hover { cursor: pointer; background: rgba({$this->color_highlight},1); }
@@ -259,7 +259,7 @@ RTNTHIS;
     .critDataElement { position: relative; } 
     .suggestionBox { position: absolute; height: 13vh; overflow: auto; padding: .2vh .2vw; border: 1px solid rgba({$this->color_dark1},1); width: 100%; background: rgba({$this->color_white},1); margin-top: 2px; display: none; z-index: 5 } 
 
-    .prepoptions { display: grid; grid-template-columns: repeat( 6, 5vw); grid-gap: .8vw;  } 
+    .prepoptions { display: grid; grid-template-columns: repeat( 6, 7vw); grid-gap: .2vw;  } 
     .chkBoxHolder { width: 7vw; }
     .cbhMargin { margin: 0 3vw 0 0; display: grid; grid-template-columns: 8vw 5vw; grid-gap: .1vw; }
     .chkBoxLbl { font-family: Roboto; font-size: 1.5vh; color: rgba({$this->color_dark1},1); font-weight: bold; padding: .3vh 0;   }  
@@ -271,10 +271,10 @@ RTNTHIS;
 
     .critDataLabel { font-family: 'Roboto'; font-size: 1.5vh; font-weight: bold; text-decoration: none; color: rgba({$this->color_dark1},1);    } 
 
-    #fldCritSpcCat { width: 11vw;  }
-    #fldCritSite { width: 25vw;  }
+    #fldCritSpcCat { width: 15vw;  }
+    #fldCritSite { width: 30vw;  }
     #suggestionfldCritSite { width: 25vw; } 
-    #fldCritDX { width: 30vw; } 
+    #fldCritDX { width: 35vw; } 
     #suggestfldCritDX { width: 30vw; } 
 
     .vocabularyCount { font-size: 1.1vh; text-align: right; }

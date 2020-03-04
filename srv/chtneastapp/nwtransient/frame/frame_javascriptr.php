@@ -97,7 +97,7 @@ function searchresults ( $rqst ) {
   if ( $rqst[2] !== "") {  
         require(serverkeys . "/sspdo.zck");      
         $newrqst = explode("/",str_replace("-","", $_SERVER['REQUEST_URI']));     
-        $paraSQL = "SELECT srchrqstid, rqston, rqststr FROM webcapture.nwtransient_searchrequest where srchrqstid = :srchrqstid";
+        $paraSQL = "SELECT srchrqstid, rqston, rqststr FROM tidal.searchrequest where srchrqstid = :srchrqstid";
         $paraRS = $conn->prepare( $paraSQL );
         $paraRS->execute( array( ':srchrqstid' => $newrqst[2])); 
         
@@ -106,24 +106,43 @@ function searchresults ( $rqst ) {
 
    document.addEventListener('DOMContentLoaded', function() {
        
-        runThisRequest (  rqststr  ).then (function (fulfilled) {         
-            //byId('suggest'+inputs.id).innerHTML = fulfilled;
-            //byId('suggest'+inputs.id).style.display = 'block';
-          })
-          .catch(function (error) {
-            //byId('suggest'+inputs.id).innerHTML = '<div class=errordspmsg>No Suggestions ...</div>';
-            //byId('suggest'+inputs.id).style.display = 'block';
+
+        runThisRequest ( '{$newrqst[2]}'  ).then (function (fulfilled) {         
+
+            console.log ( fulfilled );      
+
+         })
+         .catch(function (error) {
+
             console.log(error.message);
-          }); 
-                  
+         });          
+
+
     });                  
     
-var runThisRequest = function ( whichcriteria ) { 
+var runThisRequest = function ( whichurl ) { 
   return new Promise(function(resolve, reject) {
-          
-          //resolve( dta['DATA']  );
 
-          reject(Error("It broke! "));                  
+
+    var obj = new Object(); 
+    obj['requestedurl'] = whichurl;
+    var passdta = JSON.stringify(obj);         
+    console.log ( passdta );
+
+    httpage.open("POST","{$dp}/run-transient-request", true);    
+    httpage.setRequestHeader("Authorization","Basic " + btoa(regu+":"+regi));
+    httpage.onreadystatechange = function() { 
+      if (httpage.readyState === 4) {
+         if ( parseInt(httpage.status) === 200 ) { 
+           var dta = JSON.parse( httpage.responseText );  
+           resolve( dta['DATA'] );
+         } else { 
+           reject(Error("It broke! "+httpage.status+" --- "  ));                  
+         }
+     }
+    };
+    httpage.send ( passdta );
+
   });
 }
                   
@@ -195,10 +214,10 @@ function submitTidalRequest() {
   });
 
   var obj = new Object(); 
-  obj['specimenCategory'] = byId('fldCritSpcCat').value;
+  obj['specimencategory'] = byId('fldCritSpcCat').value;
   obj['site'] = byId('fldCritSite').value;
   obj['diagnosis'] = byId('fldCritDX').value;
-  obj['preparations'] = JSON.stringify(preparations);
+  obj['preparation'] = JSON.stringify(preparations);
   var passdta = JSON.stringify(obj);         
   console.log( obj );
   var mlURL = "/commit-tidal-request";
@@ -216,8 +235,7 @@ function answerSubmitTidalRequest ( rtnData ) {
      alert("ERROR:\\n"+dspMsg);
    } else {
      var rsp = JSON.parse(rtnData['responseText']); 
-     window.location.href = "{$tt}/search-results/"+rsp['DATA'];
-          
+     window.location.href = "{$tt}/search-results/"+rsp['DATA']; 
    }                  
 }          
 

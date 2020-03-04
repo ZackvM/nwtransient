@@ -14,7 +14,7 @@ class bldcontent {
     function searchresults ( $rqst ) { 
         require(serverkeys . "/sspdo.zck");
         $newrqst = explode("/",str_replace("-","", $_SERVER['REQUEST_URI']));     
-        $paraSQL = "SELECT srchrqstid, rqston, rqststr FROM webcapture.nwtransient_searchrequest where srchrqstid = :srchrqstid";
+        $paraSQL = "SELECT srchrqstid, rqston, rqststr FROM tidal.searchrequest where srchrqstid = :srchrqstid";
         $paraRS = $conn->prepare( $paraSQL );
         $paraRS->execute( array( ':srchrqstid' => $newrqst[2])); 
         
@@ -26,24 +26,16 @@ PGERTN;
         } else { 
           $para = $paraRS->fetch(PDO::FETCH_ASSOC);   
           $rtnthis = <<<PGERTN
-<script>
-    var srchrqstid = "{$para['srchrqstid']}";
-    var rqston = "{$para['rqston']}";
-    var rqststr = {$para['rqststr']};                  
-</script>
 
 <div id=waiterDialog>
-    Waiting On System ... 
-    
+   Waiting On System ...  
 </div>    
                   
 PGERTN;
         }        
         return $rtnthis;
     }
-    
-    
-    
+     
     function newsearch ( $rqst ) { 
       $tt = treeTop;
       $ott = ownerTreeTop;
@@ -68,6 +60,10 @@ PGERTN;
    <div id=criteriaSide>
 
      <div id=newSearchInstructions>Instructions: Fill out the form below then click 'Submit'.  For a more indepth tutorial, click the 'Using Tidal' menu option above or click a field label. </div>
+
+     <div id=credentialsSide>
+       &nbsp;
+     </div>
 
      <div id=criteriaLineOne>
 
@@ -105,9 +101,6 @@ PGERTN;
     </div>
 
 
-   </div>
-   <div id=credentialsSide>
-    &nbsp;
    </div>
 <div>
 PGERTN;

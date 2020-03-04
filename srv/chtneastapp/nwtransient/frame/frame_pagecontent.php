@@ -38,17 +38,14 @@ PAGECONTENT;
     }
 
     function searchresults ( $rqst ) { 
-       $tt = treeTop;      
-      $at = genAppFiles;
-      
+      $tt = treeTop;      
+      $at = genAppFiles;      
       if ( trim($rqst[2]) === "" ) { 
          $pageData = "PAGE ERROR - NO SEARCH ID FOUND IN URI";
       } else { 
         $cb = new bldcontent();  
         $pageData = $cb->searchresults( $rqst );
-          
       }
-
      $pge = <<<PAGECONTENT
 <div id=mainPageDiv>
   {$pageData} 
@@ -56,8 +53,7 @@ PAGECONTENT;
 PAGECONTENT;
       return $pge;      
     }
-    
-    
+     
     function newsearch ( $rqst ) { 
       $tt = treeTop;      
       $at = genAppFiles;
@@ -76,7 +72,7 @@ PAGECONTENT;
       $at = genAppFiles;
       $cb = new bldcontent();  
       $pageData = $cb->root( $rqst );
-$pge = <<<PAGECONTENT
+      $pge = <<<PAGECONTENT
 <div id=mainPageDiv>
   {$pageData} 
 </div>
