@@ -30,8 +30,8 @@ class mastercontroldevices {
   <div id=menuItems>
         <a href="{$tt}" class="logoholder">{$chtnlogo}</a>
         <a href="{$ott}" class="menuLink" target="_new">CHTN Eastern</a>     
-        <a href="{$tt}/new-search" class="menuLink" target="_new">New Search</a>     
-        <a href="{$tt}/how-to-use-tidal" class="menuLink" target="_new">Using TIDAL</a>     
+        <a href="{$tt}/new-search" class="menuLink">New Search</a>     
+        <a href="{$tt}/how-to-use-tidal" class="menuLink">Using TIDAL</a>     
         <a href="{$tt}/contact-us" class="menuLink">Contact Us</a>     
   </div>
 
