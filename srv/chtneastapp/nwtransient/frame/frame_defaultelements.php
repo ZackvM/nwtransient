@@ -20,7 +20,7 @@ class mastercontroldevices {
       //$r = json_encode( $rqststr );
       //UNDERLINE $WHICHPAGE
 
-      $rtnthis = <<<TOPMENU
+        $rtnthis = <<<TOPMENU
 <div id=universalTopBarHolder>
 
   <div id=topAppBar>

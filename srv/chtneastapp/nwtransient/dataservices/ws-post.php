@@ -52,20 +52,82 @@ class datadoers {
 
      if ( $rqstRS->rowCount() < 1 ) { 
      } else {
-       //{"RESPONSECODE":200,"MESSAGE":[],"ITEMSFOUND":0,"DATA":{"rqston":"03\/03\/2020 17:12","speccat":"MALIGNANT","site":"THYROID","diagnosis":"CARCINOMA","rqststr":"{\"specimencategory\":\"MALIGNANT\",\"site\":\"thyroid\",\"diagnosis\":\"Carcinoma\",\"preparations\":\"[\\\"checkbox-PB\\\",\\\"checkbox-FROZEN\\\"]\"}"}}  
        $rqst = $rqstRS->fetch(PDO::FETCH_ASSOC); 
        $serviceListSQL = "SELECT identifiercode FROM tidal.sys_registeredservices where activeind = 1";
        $serviceListRS = $conn->prepare( $serviceListSQL );
        $serviceListRS->execute();
-
        while ( $r = $serviceListRS->fetch(PDO::FETCH_ASSOC)) { 
          $ts = new transientservices( $r['identifiercode'], $rqst['rqststr'] );
          if ( $ts->responseCode === 200 ) {
-             $dta['sampledata'][ $r['identifiercode'] ] = $ts->rtnData; 
+             $rtn[ $r['identifiercode'] ] = $ts->rtnData; 
          }
        } 
+       $totalFound = 0;
+ 
+       
 
-       $dta[] = $rqst;
+       foreach ( $rtn as $key => $val ) { 
+         $itemline = json_decode( $val, true );
+         $totalFound += (int)$itemline['ITEMSFOUND'];
+         $rtnTbl =  bldDisplayTableFromReturn ( $key, $itemline );
+       }
+
+       $itemsfound = $totalFound;
+ 
+       $a = json_decode( $rqst['rqststr'] , true );
+       $prep = json_decode( preg_replace('/checkbox\-/','',$a['preparation']));
+       foreach ( $prep as $pv ) {
+         $p .= " {$pv}";
+       }
+       $p = trim($p);
+
+
+       $dta = "
+
+   <div id=buttonHolder>
+    <div class=ctlBtn onclick=\"action_selectall();\"><div><i class=\"material-icons\">done_all</i></div><div class=ctlBtnText>Select All</div></div>
+    <div class=ctlBtn onclick=\"action_selectnone();\"><div><i class=\"material-icons\">select_all</i></div><div class=ctlBtnText>Select None</div></div>
+    <div class=ctlBtn onclick=\"action_makerequest();\"><div><i class=\"material-icons\">menu_open</i></div><div class=ctlBtnText id=btnRequester>Request</div></div>
+   </div>
+
+             <div id=criteriaDisplay>
+
+                <div id=instructionDisplay>
+                  <b>Instructions</b>: Instructions on using this screen go here ...
+                </div> 
+
+               <div class=grider align=left>
+                 <div class=\"critElemHold rqstdate\"> 
+                   <div class=critElemLabel>Query Requested On</div>
+                   <div class=critElemData>{$rqst['rqston']}</div>
+                 </div> 
+                 
+                 <div class=critElemHold> 
+                   <div class=critElemLabel><span class=smlFont>Criteria Parameter</span><br>Specimen Category</div>
+                   <div class=critElemData>{$rqst['speccat']}</div>
+                 </div> 
+
+                 <div class=critElemHold> 
+                   <div class=critElemLabel><span class=smlFont>Criteria Parameter</span><br>Site</div>
+                   <div class=critElemData>{$rqst['site']}</div>
+                 </div> 
+
+                 <div class=critElemHold> 
+                   <div class=critElemLabel><span class=smlFont>Criteria Parameter</span><br>Diagnosis</div>
+                   <div class=critElemData>{$rqst['diagnosis']}</div>
+                 </div>     
+
+                 <div class=critElemHold> 
+                   <div class=critElemLabel><span class=smlFont>Criteria Parameter</span><br>Preparations</div>
+                   <div class=critElemData>{$p}</div>
+                 </div>    
+
+                 <div class=itemsFoundLine>Items Found: {$totalFound}</div>
+
+               </div>
+             </div>  
+            {$rtnTbl}";
+
        $responseCode = 200;
      }
 
@@ -87,13 +149,13 @@ class datadoers {
      $pdta = json_decode($passdata, true); 
      $at = genAppFiles;
      //TODO:  DATA CHECKS
-     $rqstCaptureSQL = "insert into tidal.searchrequest (srchrqstid, rqston, rqstby_user, rqstby_phpid, rqststr,speccat, site, diagnosis) values(:srchrqstid, now(), :rqstby_user, :rqstby_phpid, :rqststr, :speccat, :site, :diagnosis)"; 
+     $rqstCaptureSQL = "insert into tidal.searchrequest (srchrqstid, rqston, rqstby_user, rqstby_phpid, rqststr, speccat, site, diagnosis) values(:srchrqstid, now(), :rqstby_user, :rqstby_phpid, :rqststr, :speccat, :site, :diagnosis)"; 
      $rqstCaptureRS = $conn->prepare( $rqstCaptureSQL );
      $srchrqst = generateRandomString(15);
      if ( isset ( $_SESSION['loggedon']) ) { 
-         $rqstCaptureRS->execute(array( ':srchrqstid' => $srchrqst, ':rqstby_user' => 'USER GOES HERE', ':rqstby_phpid' => $sessid, ':rqststr' => $passdata, ':speccat' => strtoupper(trim($pdta['specimenCategory'])), ':site' => strtoupper(trim($pdta['site'])), ':diagnosis' => strtoupper(trim($pdta['diagnosis']))  ));
+         $rqstCaptureRS->execute(array( ':srchrqstid' => $srchrqst, ':rqstby_user' => 'USER GOES HERE', ':rqstby_phpid' => $sessid, ':rqststr' => $passdata, ':speccat' => strtoupper(trim($pdta['specimencategory'])), ':site' => strtoupper(trim($pdta['site'])), ':diagnosis' => strtoupper(trim($pdta['diagnosis']))  ));
      } else { 
-         $rqstCaptureRS->execute(array( ':srchrqstid' => $srchrqst, ':rqstby_user' => '', ':rqstby_phpid' => $sessid, ':rqststr' => $passdata, ':speccat' => strtoupper(trim($pdta['specimenCategory'])), ':site' => strtoupper(trim($pdta['site'])), ':diagnosis' => strtoupper(trim($pdta['diagnosis'])) ));
+         $rqstCaptureRS->execute(array( ':srchrqstid' => $srchrqst, ':rqstby_user' => '', ':rqstby_phpid' => $sessid, ':rqststr' => $passdata, ':speccat' => strtoupper(trim($pdta['specimencategory'])), ':site' => strtoupper(trim($pdta['site'])), ':diagnosis' => strtoupper(trim($pdta['diagnosis'])) ));
      }
      $dta = $srchrqst;
      $responseCode = 200;
@@ -164,35 +226,121 @@ class datadoers {
 }
 
 
+function bldDisplayTableFromReturn ( $division, $rawData ) {
+  //https://dev.chtneast.org/print-obj/pathology-report/VUZJVWJnSHM5WVJOemdsQkloRnNxUT09
+  //{\"RESPONSECODE\":200,\"MESSAGE\":[],\"ITEMSFOUND\":88,\"DATA\":[{\"bgs\":\"33454A1002\",\"specimencategory\":\"MALIGNANT\",\"site\":\"THYROID\",\"diagnosis\":\"CARCINOMA | ANAPLASTIC\",\"preparation\":\"FFPE\",\"hourspost\":0,\"metric\":\"0.11 Grams\",\"prselector\":\"9ZIYHIJN\"}  
+
+$thisyear = date('Y');
+
+  $rtnthis = <<<RTNTHIS
+
+<div id=itemHolder>
+  <div id=itemHeader>
+    <div class=headerDsp>Specimen Category</div>
+    <div class=headerDsp>Site | Sub-Site</div>
+    <div class=headerDsp>Diagnosis | Modifier</div>
+    <div class=headerDsp>Preparation</div>
+    <div class=headerDsp>Metric</div>
+    <div class=headerDsp><center>Pst Exc</div>
+    <div class=headerDsp>Age | Race | Sex</div>
+    <div class=headerDsp>Pathology Report</div>
+    <div class=headerDsp>Identifier</div>
+  </div>
+
+RTNTHIS;
+
+  $cntr = 0;
+  foreach ( $rawData['DATA'] as $key => $value ) {
+    if ( trim($value['prselector']) !== "" ) { 
+      //TODO: MAKE DYNAMIC PER INSTITUTION DIVISION 
+      $plink = cryptservice ( $value['prselector'], 'e' );
+      $pradd = "<div class=itemElementHold><div class=itemElementLabel>Pathology Report</div><div class=itemElementData ><a href=\"https://dev.chtneast.org/print-obj/pathology-report/{$plink}\" target=\"_blank\">Pathology Report</a></div></div>";
+    } else { 
+      $pradd = "<div class=itemElementHold><div class=itemElementLabel>Pathology Report</div><div class=itemElementData >&nbsp;</div></div>";
+    }     
+
+    $smplid = strtoupper( trim( $value['bgs'] ));
+    $dx = ( trim($value['diagnosis']) !== "" ) ? preg_replace( '/^\|\s/', "", strtoupper(trim($value['diagnosis'])) )  : "";
+    $st = ( trim($value['site']) !== "" ) ? preg_replace( '/^\|\s/', "", strtoupper(trim($value['site'])) )  : "";
+
+  $rtnthis .= <<<RTNTHIS
+    <div class=transientItem data-selected='false' id="{$division}-{$value['bgs']}" onclick="selectThisSample(this.id);">
+
+      <div class=itemElementHold >
+        <div class=itemElementLabel>Specimen Category</div>
+        <div class=itemElementData>{$value['specimencategory']}&nbsp;</div>
+      </div>
+      <div class=itemElementHold>
+        <div class=itemElementLabel>Site</div>
+        <div class=itemElementData>{$st}&nbsp;</div>
+      </div>
+      <div class=itemElementHold>
+        <div class=itemElementLabel>Diagnosis</div>
+        <div class=itemElementData>{$dx}&nbsp;</div>
+      </div>
+      <div class=itemElementHold>
+        <div class=itemElementLabel>Preparation</div>
+        <div class=itemElementData>{$value['preparation']}&nbsp;</div>
+      </div>
+      <div class=itemElementHold>
+        <div class=itemElementLabel>Specimen Metric</div>
+        <div class=itemElementData>{$value['metric']}&nbsp;</div>
+      </div>
+      <div class=itemElementHold>
+        <div class=itemElementLabel>Hours Post-Excision</div>
+        <div class=itemElementData>{$value['hourspost']}&nbsp;</div>
+      </div>
+      <div class=itemElementHold>
+        <div class=itemElementLabel>Age/Race/Sex</div>
+        <div class=itemElementData>{$value['ars']}&nbsp;</div>
+      </div>
+      {$pradd}
+      <div class=itemElementHold>
+        <div class=itemElementLabel>Identifier</div>
+        <div class="identsml">{$smplid}&nbsp;</div>
+      </div>
+    </div>   
+
+RTNTHIS;
+  }
+ $rtnthis .= "</div><div id=copyrightdsp> &#9400; Copyright Code and Content - CHTN Eastern Division/Perelman School of Medicine, University of Pennsylvania 2007-{$thisyear} </div>";
+
+  return $rtnthis; 
+}
+
 
 class transientservices { 
 
   public $responseCode = 400;
   public $rtnData = "";
-  private $servicestub = ""; 
-  private $username = ""; 
-
 
   function __construct() { 
-      
     $args = func_get_args(); 
     $nbrofargs = func_num_args(); 
-    
     if ( $nbrofargs <> 2 ) {
     } else {
       if ( self::checkServiceExists ( $args[0] ) ) {
-        $this->rtnData = $args[1] ;    
-        //{"specimencategory":"MALIGNANT","site":"thyroid","diagnosis":"carcinoma","preparation":"[\"checkbox-PB\",\"checkbox-FROZEN\"]"}
-        //curl -X POST -k -H 'Authorization: Basic Y2h0bmVhc3Q6V1dwUVZYaHlWWGNySzNsSE5tSnBWblJTVVZKTk5FTjNZM0JrUkU5b1dTc3ZlR3Q1VHpkcE9XWm5OM2hGYldFd01uZFNOR3gwTVROVk9WTklOemRIZGc9PQ==' -i 'https://dev.chtneast.org/data-services/data-doers/transient-bank-search' --data '{"requester":"EST","requestedDataPage":0,"requestedSite":"THYROID","requestedDiagnosis":"CARCINOMA","requestedCategory":"MALIGNANT","requestedPreparation":["PB"]}'
-
-
-
+        $a = json_decode( $args[1] , true );
+        $payload['requestedCategory'] =  $a['specimencategory'];
+        $payload['requestedSite'] =  $a['site'];
+        $payload['requestedDiagnosis'] =  $a['diagnosis'];
+        $payload['reuqester'] = 'EST';
+        $payload['requestedDataPage'] = 0;
+        $prep = json_decode( preg_replace('/checkbox\-/','',$a['preparation']));
+        $p = array();
+        foreach ( $prep as $pv ) {
+          $p[] = $pv;
+        }
+        $payload['requestedPreparation'] =  $p;
+        //TODO:  MAKE THIS INFORMATION PULL FROM THE DATABASE SO THAT IT IS DYNAMIC AND EXPANDABLE TO OTHER SERVICES
+        $si = serverIdent;
+        $sp = serverpw;
+        $method = "POST";
+        $url = "https://dev.chtneast.org/data-services/data-doers/transient-bank-search";
+        $this->rtnData = callrestapi($method, $url, $si, $sp, json_encode( $payload ));
         $this->responseCode = 200; 
       }
     }
-
-
-
   }
 
   function checkServiceExists( $whichservice ) {
@@ -206,8 +354,6 @@ class transientservices {
     } 
     return $status;
   }
-
-
 
 }
 

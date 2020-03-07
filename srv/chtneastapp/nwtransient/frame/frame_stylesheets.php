@@ -36,7 +36,7 @@ class stylesheets {
 html { margin: 0; box-sizing: border-box; min-height: 100%; } 
 body { margin: 0; font-family: Roboto;  box-sizing: border-box;  min-height: 100%; margin: 0; margin: 0; position: relative; }
 * { box-sizing: border-box; } 
-#universalbacker { position: relative; top: 0; left: 0;  z-index: 100; background: rgba({$this->color_zackgrey},.8); height: 100vh; width: 100vw; display: none; } 
+#universalbacker { position: fixed; top: 0; left: 0;  z-index: 100; background: rgba({$this->color_zackgrey},.8); height: 100vh; width: 100vw; display: none; } 
 
 
 
@@ -213,13 +213,62 @@ RTNTHIS;
         $paraRS->execute( array( ':srchrqstid' => $newrqst[2])); 
         
         if ( $paraRS->rowCount() < 1 ) {  //BAD REQUEST ID
+          $rtnthis = <<<RTNTHIS
+
+body { background: rgba({$this->color_white},1); position: relative; } 
+#errorDialog { display: block;text-align: center; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba({$this->color_lamber},.4); border: 8px solid rgba({$this->color_grey},1); padding: 5vh 8vw; border-radius: 8px; font-family: Roboto; font-size: 2vh; color: rgba({$this->color_dark1},1); -webkit-box-shadow: 5px 5px 45px 9px rgba(0,0,0,0.25); box-shadow: 5px 5px 45px 9px rgba(0,0,0,0.25); }
+
+RTNTHIS;
         } else {
-    $rtnthis = <<<RTNTHIS
+          $rtnthis = <<<RTNTHIS
  
 body { background: rgba({$this->color_white},1); position: relative; } 
-#waiterDialog { width: 100%; height: 100%; text-align: center;     }    
-            
+#waiterDialog { text-align: center; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba({$this->color_lamber},.4); border: 8px solid rgba({$this->color_grey},1); padding: 5vh 8vw; border-radius: 8px; font-family: Roboto; font-size: 2vh; color: rgba({$this->color_dark1},1); -webkit-box-shadow: 5px 5px 45px 9px rgba(0,0,0,0.25); box-shadow: 5px 5px 45px 9px rgba(0,0,0,0.25); }
+
+#errorDialog { display: none;text-align: center; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba({$this->color_lamber},.4); border: 8px solid rgba({$this->color_grey},1); padding: 5vh 8vw; border-radius: 8px; font-family: Roboto; font-size: 2vh; color: rgba({$this->color_dark1},1); -webkit-box-shadow: 5px 5px 45px 9px rgba(0,0,0,0.25); box-shadow: 5px 5px 45px 9px rgba(0,0,0,0.25); } 
+
+#displayBSData { display: none; margin: 13vh 2vw 3vh 8vw;    } 
+
+#displayBSData #criteriaDisplay { display: grid; grid-template-columns: auto 30vw; grid-gap: .2vw; }
+
+#displayBSData #criteriaDisplay #instructionDisplay { border: 1px solid rgba({$this->color_dark1},1); padding: .3vw .2vw; background: rgba({$this->color_lamber},.3); font-family: Roboto; font-size: 1.8vh; color: rgba({$this->color_dark1},1);    }
+
+#displayBSData #criteriaDisplay .grider { width: 30vw; display: grid; grid-template-columns: repeat( 2, 15vw); grid-gap: .2vw;   }
+#displayBSData #criteriaDisplay .critElemHold { border: 1px solid rgba({$this->color_dark1},1); padding: .2vh .3vw;    } 
+#displayBSData #criteriaDisplay .grider .rqstdate { grid-column: span 2; }
+#displayBSData #criteriaDisplay .critElemLabel { font-family: Roboto; color: rgba({$this->color_dark1},1); font-size: 1.4vh; font-weight: bold; } 
+#displayBSData #criteriaDisplay .critElemLabel .smlFont { font-size: 1vh; font-style: italic; padding: 0; font-weight: normal;   }
+#displayBSData #criteriaDisplay .critElemData { font-family: Roboto; font-size: 1.5vh; padding: .2vh .3vw; }  
+#displayBSData #criteriaDisplay .itemsFoundLine {border: 1px solid rgba({$this->color_dark1},1); grid-column: span 2; padding: .4vh .5vw; background: rgba({$this->color_black},1); color: rgba({$this->color_white},1); font-family: Roboto; font-size: 1.5vh;   } 
+ 
+#buttonHolder { position: fixed; top: 14vh; left: 1vw; display: grid; grid-gap: .5vh; }
+#buttonHolder .ctlBtn { border: 1px solid rgba({$this->color_dark1},1); display: grid; grid-template-columns: 1.8vw 4.7vw; font-size: 1.5vh; color: rgba({$this->color_dark1},1); box-sizing: border-box; padding: 0 0 0 .1vw; background: rgba({$this->color_highlight},.1); -webkit-transition-duration: 0.5s; transition-duration: 0.5s; transition: 0.5s; }
+#buttonHolder .ctlBtn:hover { cursor: pointer; background: rgba({$this->color_darkgreen},.2);     } 
+#buttonHolder .ctlBtn .material-icons { font-size: 1.6vw; } 
+#buttonHolder .ctlBtn .ctlBtnText { padding: .7vh 0 .3vh 0; }  
+
+
+.transientItem {   } 
+.transientItem .itemElementHold {   } 
+.transientItem .itemElementHold .itemElementLabel { display: none; }
+
+#itemHolder { border: 1px solid #000; margin: 1vh 0 0 0; }
+#itemHolder #itemHeader { background: rgba({$this->color_dark1},1); color: rgba({$this->color_white},1); display: grid; grid-template-columns: 12vw 18vw 18vw 10vw 10vw 2vw 7vw 7vw auto; }
+#itemHolder #itemHeader .headerDsp {  font-family: Roboto; font-size: 1.5vh; font-weight: bold; padding: 1.5vh .3vw; border-right: 1px solid rgba({$this->color_white},1);  }  
+#itemHolder #itemHeader .headerDsp:last-child { border: none; }
+
+#itemHolder .transientItem { display: grid; grid-template-columns: 12vw 18vw 18vw 10vw 10vw 2vw 7vw 7vw auto; background: rgba({$this->color_white},1); border-bottom: 1px solid rgba({$this->color_dark1},1); -webkit-transition-duration: 0.1s; transition-duration: 0.1s; transition: 0.1s;   }
+#itemHolder .transientItem:hover { background: rgba({$this->color_darkgreen},.1); cursor: pointer;  }
+#itemHolder .transientItem[data-selected='true'] { background: rgba({$this->color_highlight},.2);     } 
+
+#itemHolder .transientItem .itemElementData { font-family: Roboto; font-size: 1.5vh; padding: .6vh .3vw; border-right: 1px solid rgba({$this->color_dark1},1); height: 100%;   }
+#itemHolder .transientItem .identsml { font-family: Roboto; font-size: 1.1vh; padding: 1vh .3vw; border-right: 1px solid rgba({$this->color_dark1},1); height: 100%; } 
+
+
+#copyrightdsp { width: 100%; text-align: center; font-family: 'Roboto Condensed'; font-size: 1.2vh; color: rgba({$this->color_dark},1); background: rgba({$this->color_white},1); position: relative; z-index: 2; padding: 3vh 8vw 2vh 8vw; } 
+
 RTNTHIS;
+//#itemHolder .transientItem:nth-child(even) { background: rgba({$this->color_darkgreen},.1); } 
         }
     return $rtnthis;
 }
@@ -285,7 +334,10 @@ RTNTHIS;
 
 
     #credentialsSide { border-left: 1px solid #000; }
- 
+
+
+    #copyrightdsp { width: 100%; text-align: center; font-family: 'Roboto Condensed'; font-size: 1.2vh; color: rgba({$this->color_dark},1); background: rgba({$this->color_white},1); position: relative; z-index: 2; padding: 15vh 8vw 2vh 8vw; } 
+
 
 RTNTHIS;
     return $rtnthis;

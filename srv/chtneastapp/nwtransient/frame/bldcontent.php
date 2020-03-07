@@ -11,7 +11,8 @@ class bldcontent {
       $this->serverapi = $serverpw;
     }
 
-    function searchresults ( $rqst ) { 
+    function searchresults ( $rqst ) {
+        $tt = treeTop; 
         require(serverkeys . "/sspdo.zck");
         $newrqst = explode("/",str_replace("-","", $_SERVER['REQUEST_URI']));     
         $paraSQL = "SELECT srchrqstid, rqston, rqststr FROM tidal.searchrequest where srchrqstid = :srchrqstid";
@@ -20,17 +21,20 @@ class bldcontent {
         
         if ( $paraRS->rowCount() < 1 ) { 
             //POP ERROR
+          
         $rtnthis = <<<PGERTN
-             <h1>NO PARAMETER CRITERIA FOUND FOR GIVEN IDENTIFIER
+             <div id=errorDialog><h1>NO PARAMETER CRITERIA FOUND FOR GIVEN IDENTIFIER</div>
 PGERTN;
-        } else { 
+        } else {
+          
+          $at = genAppFiles; 
+          $waiter = base64file("{$at}/publicobj/graphics/icons/ajax-loader.gif","waitericon","gif",true);
+
           $para = $paraRS->fetch(PDO::FETCH_ASSOC);   
           $rtnthis = <<<PGERTN
-
-<div id=waiterDialog>
-   Waiting On System ...  
-</div>    
-                  
+<div id=waiterDialog>Accessing Systems.  Please wait.<br>Your results will display shortly ...<div>{$waiter}</div></div>  
+<div id=errorDialog>No Biosamples found matching your request ... <p><a href="{$tt}/new-search">Try again?</a></div>
+<div id=displayBSData>&nbsp;</div>  
 PGERTN;
         }        
         return $rtnthis;
@@ -60,48 +64,36 @@ PGERTN;
    <div id=criteriaSide>
 
      <div id=newSearchInstructions>Instructions: Fill out the form below then click 'Submit'.  For a more indepth tutorial, click the 'Using Tidal' menu option above or click a field label. </div>
-
      <div id=credentialsSide>
        &nbsp;
      </div>
-
      <div id=criteriaLineOne>
-
        <div class=critDataLabel id=sectiontitleone>Designation</div>
-       <div id=sugestionsOnDiv> <div class="chkBoxHolder cbhMargin"><div class=chkBoxLbl>Make Vocabulary Suggestions</div><div class="checkboxThree"><input type="checkbox" class="checkboxThreeInput" id="vocabSuggest" /><label for="vocabSuggest"></label></div></div> </div>       
-
+       <div id=sugestionsOnDiv> <div class="chkBoxHolder cbhMargin"><div class=chkBoxLbl>Make Vocabulary Suggestions</div><div class="checkboxThree"><input type="checkbox" class="checkboxThreeInput" id="vocabSuggest" /><label for="vocabSuggest"></label></div></div> </div>    
        <div class=critElement>
          <a href="{$tt}/how-to-use-tidal#field-specimen-category" class=critDataLabel>Specimen Category</a>
          <div class=critDataElement>{$spccatmnu}</div>
        </div>
-
        <div class=critElement>
          <a href="{$tt}/how-to-use-tidal#field-site" class=critDataLabel>Site (Organ/Anatomic)</a>
          <div class=critDataElement><input type=text id=fldCritSite class=criteriaInputField><div class=suggestionBox id=suggestfldCritSite> </div></div>
        </div>
- 
        <div class=critElement>
          <a href="{$tt}/how-to-use-tidal#field-diagnosis" class=critDataLabel>Diagnosis</a>
          <div class=critDataElement><input type=text id=fldCritDX class=criteriaInputField><div class=suggestionBox id=suggestfldCritDX> </div></div>
        </div>
-
     </div>
-
      <div id=criteriaLineTwo>
-
        <div class=critElement>
          <div class=critDataLabel id=sectiontitletwo>Preparation</div>
          <div class="critDataElement prepoptions">{$prepmmnu}</div>
        </div>
-    
      </div>
-
     <div id=criteriaLineButtonBar>
       <div id=btnSubmit class=zckBtn>Submit</div>
     </div>
-
-
    </div>
+   <div id=copyrightdsp> &#9400; Copyright Code and Content - CHTN Eastern Division/Perelman School of Medicine, University of Pennsylvania 2007-{$thisyear} </div>
 <div>
 PGERTN;
       return $rtnthis;

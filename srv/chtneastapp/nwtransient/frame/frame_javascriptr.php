@@ -106,46 +106,109 @@ function searchresults ( $rqst ) {
 
    document.addEventListener('DOMContentLoaded', function() {
        
-
-        runThisRequest ( '{$newrqst[2]}'  ).then (function (fulfilled) {         
-
-            console.log ( fulfilled );      
-
+        runThisRequest ( '{$newrqst[2]}'  )
+          .then (function (fulfilled) {         
+            if ( parseInt(fulfilled['ITEMSFOUND']) > 0 ) {
+              //DISPLAY DATA
+              byId('waiterDialog').style.display = 'none';
+              byId('errorDialog').style.display = 'none';
+              byId('displayBSData').innerHTML = fulfilled['DATA'];
+              byId('displayBSData').style.display = 'block';  
+            } else {
+              //DISPLAY NOT FOUND
+              byId('waiterDialog').style.display = 'none';
+              byId('errorDialog').style.display = 'block';
+              byId('displayBSData').style.display = 'none';  
+            }
          })
          .catch(function (error) {
-
             console.log(error.message);
          });          
 
-
     });                  
     
-var runThisRequest = function ( whichurl ) { 
-  return new Promise(function(resolve, reject) {
+    var runThisRequest = function ( whichurl ) { 
+      return new Promise(function(resolve, reject) {
+
+        var obj = new Object(); 
+        obj['requestedurl'] = whichurl;
+        var passdta = JSON.stringify(obj);         
+        httpage.open("POST","{$dp}/run-transient-request", true);    
+        httpage.setRequestHeader("Authorization","Basic " + btoa(regu+":"+regi));
+        httpage.onreadystatechange = function() { 
+          if (httpage.readyState === 4) {
+            if ( parseInt(httpage.status) === 200 ) { 
+              var dta = JSON.parse( httpage.responseText );  
+              resolve( dta );
+            } else { 
+              reject(Error("It broke!"));                  
+            }
+          }
+        };
+        httpage.send ( passdta );
+      });
+    }
 
 
-    var obj = new Object(); 
-    obj['requestedurl'] = whichurl;
-    var passdta = JSON.stringify(obj);         
-    console.log ( passdta );
+    var thismany = 0;
+    function selectThisSample ( id ) { 
 
-    httpage.open("POST","{$dp}/run-transient-request", true);    
-    httpage.setRequestHeader("Authorization","Basic " + btoa(regu+":"+regi));
-    httpage.onreadystatechange = function() { 
-      if (httpage.readyState === 4) {
-         if ( parseInt(httpage.status) === 200 ) { 
-           var dta = JSON.parse( httpage.responseText );  
-           resolve( dta['DATA'] );
-         } else { 
-           reject(Error("It broke! "+httpage.status+" --- "  ));                  
-         }
-     }
-    };
-    httpage.send ( passdta );
+      if ( byId(id).dataset.selected === 'false' ) { 
+        byId(id).dataset.selected = 'true';
+        thismany++;
+      } else { 
+        byId(id).dataset.selected = 'false';
+        thismany--;
+      }
+      updateRequester();
+    }
 
-  });
-}
-                  
+    function updateRequester() { 
+      byId('btnRequester').innerHTML = ( thismany > 0 ) ? "Request ("+thismany+")" : "Request"; 
+    }
+
+    function action_selectall() { 
+      var itmlst = document.querySelectorAll(".transientItem");
+      thismany = 0;
+      itmlst.forEach((itm) => {
+        byId( itm.id ).dataset.selected = 'true';
+        thismany++;
+      });
+      updateRequester();
+    }
+
+    function action_selectnone() { 
+      var itmlst = document.querySelectorAll(".transientItem");
+      itmlst.forEach((itm) => {
+        byId( itm.id ).dataset.selected = 'false';
+      });
+      thismany = 0;
+      updateRequester();
+    }
+
+    function action_makerequest() { 
+
+      var itmlst = document.querySelectorAll(".transientItem");
+      var howmany = 0;
+      itmlst.forEach((itm) => {
+        if ( byId( itm.id ).dataset.selected === 'true' ) {
+          howmany++;
+        }
+      });
+      if ( howmany < 1 ) { 
+        alert('You haven\'t selected any biosamples ... ');
+      } else {
+        var rqstBS = [];
+        itmlst.forEach((itm) => {
+          if ( byId( itm.id ).dataset.selected === 'true' ) {
+            rqstBS.push( itm.id ); 
+          }
+        });
+
+        alert ( JSON.stringify ( rqstBS ) ) ;
+      }
+    }
+
 GLOBJAVA;
         }
   }
@@ -164,6 +227,21 @@ document.addEventListener('DOMContentLoaded', function() {
     submitTidalRequest();
   });
 
+
+  if (  byId('fldCritSpcCat') ) { 
+    byId('fldCritSpcCat').value = "";
+  }
+  if ( byId('fldCritSite') ) { 
+    byId('fldCritSite').value = "";
+  }
+  if ( byId('fldCritDX') ) {
+    byId('fldCritDX').value = "";
+  }
+
+  var chk = document.querySelectorAll(".checkboxThreeInput");
+  chk.forEach((chkbox) => {
+    chkbox.checked = false;
+  });
 
   var el = document.querySelectorAll(".criteriaInputField");
   el.forEach((inputs) => {
@@ -219,7 +297,7 @@ function submitTidalRequest() {
   obj['diagnosis'] = byId('fldCritDX').value;
   obj['preparation'] = JSON.stringify(preparations);
   var passdta = JSON.stringify(obj);         
-  console.log( obj );
+  //console.log( obj );
   var mlURL = "/commit-tidal-request";
   universalAJAX("POST",mlURL,passdta,answerSubmitTidalRequest,2);          
 }
