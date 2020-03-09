@@ -34,6 +34,47 @@ function __construct() {
 
 class datadoers {
 
+   function transientrequestrequest ( $request, $passdata ) { 
+     $responseCode = 400;
+     $rows = array();
+     $msgArr = array(); 
+     $errorInd = 0;
+     $itemsfound = 0;
+     require(serverkeys . "/sspdo.zck");
+     session_start(); 
+     $sessid = session_id();      
+     $pdta = json_decode($passdata, true); 
+     $at = genAppFiles;
+//{"EBdd3bNH1KQFyYu":{"EST-87206T001":{"spc":"MALIGNANT","ste":"THYROID","dxd":"","prp":"LN-2 (Snap Frozen)"}
+
+     //TODO:  Data Checks
+
+
+     if ( $errorInd === 0 ) {
+
+       foreach ( $pdta as $k => $v ) { 
+         $comreq = $k; 
+         $rqstid = generateRandomString(15);
+         $rSQL = "insert into tidal.requestlist ( requestlistid, srchrqstid, rqstdate) values(:rqstid,:srchid, now())";
+         $rRS = $conn->prepare( $rSQL );
+         $rRS->execute( array( ':rqstid' => $rqstid, ':srchid' => $comreq ));
+         $dSQL = "insert into tidal.requestlistdetails ( rqstlistid, sampleid, sampledefinition ) values ( :rqstid, :itmid, :sampledef )";
+         $dRS = $conn->prepare( $dSQL );
+         foreach ( $pdta[ $comreq ] as $crk => $crv ) { 
+           $dRS->execute( array( ':rqstid' => $rqstid, ':itmid' => $crk, ':sampledef' => json_encode( $crv ) )); 
+         }
+       }
+
+       $dta = $comreq;
+       $responseCode = 200;
+     }
+
+     $msg = $msgArr;
+     $rows['statusCode'] = $responseCode; 
+     $rows['data'] = array( 'RESPONSECODE' => $responseCode, 'MESSAGE' => $msg, 'ITEMSFOUND' => $itemsfound, 'DATA' => $dta);
+     return $rows;        
+   }
+
    function runtransientrequest ( $request, $passdata ) { 
      $responseCode = 400;
      $rows = array();
@@ -64,8 +105,6 @@ class datadoers {
        } 
        $totalFound = 0;
  
-       
-
        foreach ( $rtn as $key => $val ) { 
          $itemline = json_decode( $val, true );
          $totalFound += (int)$itemline['ITEMSFOUND'];
@@ -264,7 +303,7 @@ RTNTHIS;
     $st = ( trim($value['site']) !== "" ) ? preg_replace( '/^\|\s/', "", strtoupper(trim($value['site'])) )  : "";
 
   $rtnthis .= <<<RTNTHIS
-    <div class=transientItem data-selected='false' id="{$division}-{$value['bgs']}" onclick="selectThisSample(this.id);">
+    <div class=transientItem data-selected='false' data-spc="{$value['specimencategory']}"  data-ste="{$st}" data-dxd="{$dx}" data-prp="{$value['preparation']}" id="{$division}-{$value['bgs']}" onclick="selectThisSample(this.id);">
 
       <div class=itemElementHold >
         <div class=itemElementLabel>Specimen Category</div>

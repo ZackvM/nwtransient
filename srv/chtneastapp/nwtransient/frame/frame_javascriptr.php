@@ -187,7 +187,6 @@ function searchresults ( $rqst ) {
     }
 
     function action_makerequest() { 
-
       var itmlst = document.querySelectorAll(".transientItem");
       var howmany = 0;
       itmlst.forEach((itm) => {
@@ -198,15 +197,39 @@ function searchresults ( $rqst ) {
       if ( howmany < 1 ) { 
         alert('You haven\'t selected any biosamples ... ');
       } else {
-        var rqstBS = [];
+        var hld = new Object();
+        var obj = new Object(); 
+        var url = window.location.pathname.split("/");
         itmlst.forEach((itm) => {
           if ( byId( itm.id ).dataset.selected === 'true' ) {
-            rqstBS.push( itm.id ); 
+            var def = new Object(); 
+            def['spc']    = itm.dataset.spc; 
+            def['ste']    = itm.dataset.ste; 
+            def['dxd']    = itm.dataset.dxd; 
+            def['prp']    = itm.dataset.prp;
+            hld[ itm.id ]  =  def ; 
           }
         });
-
-        alert ( JSON.stringify ( rqstBS ) ) ;
+        obj[ url[2] ] = hld;
+        var passdta = JSON.stringify(obj);         
+        var mlURL = "/transient-request-request";
+        universalAJAX("POST",mlURL,passdta,answerMakeRequest,2);          
       }
+    }
+
+    function answerMakeRequest ( rtnData ) { 
+      if (parseInt(rtnData['responseCode']) !== 200) { 
+        var msgs = JSON.parse(rtnData['responseText']);
+        var dspMsg = ""; 
+        msgs['MESSAGE'].forEach(function(element) { 
+          dspMsg += "\\n - "+element;
+        });
+        //ERROR MESSAGE HERE
+        alert("ERROR:\\n"+dspMsg);
+      } else {
+        var rsp = JSON.parse(rtnData['responseText']); 
+        window.location.href = "{$tt}/define-request/"+rsp['DATA']; 
+      } 
     }
 
 GLOBJAVA;
