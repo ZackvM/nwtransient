@@ -33,6 +33,94 @@ function __construct() {
 }
 
 class datadoers {
+    
+   function buildtransientrequest ( $request, $passdata ) {
+     $responseCode = 400;
+     $rows = array();
+     $msgArr = array(); 
+     $errorInd = 0;
+     $itemsfound = 0;
+     require(serverkeys . "/sspdo.zck");
+     session_start(); 
+     $sessid = session_id();      
+     $pdta = json_decode($passdata, true); 
+     $at = genAppFiles;
+       
+          //TODO:  Data Checks
+        $paraSQL = "SELECT * FROM tidal.requestlist where requestlistid = :rlistID";
+        $paraRS = $conn->prepare( $paraSQL );
+        $paraRS->execute( array( ':rlistID' => $pdta['requestedurl'])); 
+
+        ( $paraRS->rowCount() < 1 ) ?  (list( $errorInd, $msgArr[] ) = array(1 , "ERROR!  NO REQUEST IDENTIFIER FOUND")) : "" ;
+        
+        
+
+     if ( $errorInd === 0 ) {
+
+         
+         $detSQL = "SELECT sampleid, sampledefinition FROM tidal.requestlistdetails where rqstlistid = :rqstID"; 
+         $detRS = $conn->prepare ( $detSQL ); 
+         $detRS->execute(array(':rqstID' => $pdta['requestedurl'])); 
+         $det  = $detRS->fetchAll( PDO::FETCH_ASSOC);
+         
+         foreach ( $det as $dk => $dv ) { 
+             $itmB = json_decode( $dv['sampledefinition'], true);
+             $dxd = "";             
+             $dxd .= ( trim($itmB['spc']) !== "" ) ? "{$itmB['spc']}" : "";
+             $dxd .= ( trim($itmB['ste']) !== "" ) ? " :: {$itmB['ste']}" : "";
+             $dxd .= ( trim($itmB['dxd']) !== "" ) ? " :: {$itmB['dxd']}" : "";                         
+             $rqstList .= "<div class=bsitem>"; 
+                $rqstList .= "<div class=dxddsp><div class=dxddsplabel>Diagnosis Designation</div><div class=dxd>{$dxd}</div></div>";         
+                $rqstList .= "<div class=dxddsp><div class=dxddsplabel>Preparation</div><div class=dxd>{$itmB['prp']}</div></div>"; 
+                $rqstList .= "<div class=bsitemid>{$dv['sampleid']}</div>";                          
+             $rqstList .= "</div>";
+         }
+         
+
+
+         
+       $thisyear = date('Y');  
+       $rtnPage = <<<RTNPAGE
+<div id=requestForm>
+    <div id=rListSide>
+       {$rqstList}        
+    </div>
+    <div id=rFormSide>
+      <div id=instructions>Fill out this form and a research specialist will be in contact with you about these biosamples.  All requested biosamples must match a valid and approved CHTN protocol request.  If you do not have one then the research specialist will assist you with that as well.  All biosamples requested are subject to verified availability.</div>  
+      <div id=lineOne>
+
+         <div class=dataElemHold>
+            <div class=dataElemLbl>Your Name</div>
+            <div class=dataElem><input type=text id=fldYourName></div>
+         </div>       
+
+         <div class=dataElemHold>
+            <div class=dataElemLbl>Your Phone Number</div>
+            <div class=dataElem><input type=text id=fldYourPhone></div>
+         </div>              
+
+         <div class=dataElemHold>
+            <div class=dataElemLbl>Your Email</div>
+            <div class=dataElem><input type=text id=fldYourEmail></div>
+         </div>          
+       
+       
+       
+       </div>
+     </div>                              
+</div>               
+   <div id=copyrightdsp> &#9400; Copyright Code and Content - CHTN Eastern Division/Perelman School of Medicine, University of Pennsylvania 2007-{$thisyear} </div>                              
+RTNPAGE;
+         $dta = $rtnPage;
+         $itemsfound = 1;
+         $responseCode = 200;
+     } 
+     
+     $msg = $msgArr;
+     $rows['statusCode'] = $responseCode; 
+     $rows['data'] = array( 'RESPONSECODE' => $responseCode, 'MESSAGE' => $msg, 'ITEMSFOUND' => $itemsfound, 'DATA' => $dta);
+     return $rows;               
+   } 
 
    function transientrequestrequest ( $request, $passdata ) { 
      $responseCode = 400;
@@ -65,7 +153,7 @@ class datadoers {
          }
        }
 
-       $dta = $comreq;
+       $dta = $rqstid;
        $responseCode = 200;
      }
 

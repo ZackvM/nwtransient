@@ -204,7 +204,6 @@ RTNTHIS;
     return $rtnthis;
   }
 
-  
   function searchresultsfinelandscape() { 
         require(serverkeys . "/sspdo.zck");
         $newrqst = explode("/",str_replace("-","", $_SERVER['REQUEST_URI']));     
@@ -272,7 +271,6 @@ RTNTHIS;
         }
     return $rtnthis;
 }
-  
   
   function newsearchfinelandscape() { 
 
@@ -343,7 +341,44 @@ RTNTHIS;
     return $rtnthis;
   }
 
+function definerequestfinelandscape() { 
+        require(serverkeys . "/sspdo.zck");
+        $newrqst = explode("/",str_replace("-","", $_SERVER['REQUEST_URI']));     
+        $paraSQL = "SELECT * FROM tidal.requestlist where requestlistid = :rlistID";
+        $paraRS = $conn->prepare( $paraSQL );
+        $paraRS->execute( array( ':rlistID' => $newrqst[2])); 
+        
+        if ( $paraRS->rowCount() < 1 ) {  //BAD REQUEST ID
+          $rtnthis = <<<RTNTHIS
 
+body { background: rgba({$this->color_white},1); position: relative; } 
+#errorDialog { display: block;text-align: center; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba({$this->color_lamber},.4); border: 8px solid rgba({$this->color_grey},1); padding: 5vh 8vw; border-radius: 8px; font-family: Roboto; font-size: 2vh; color: rgba({$this->color_dark1},1); -webkit-box-shadow: 5px 5px 45px 9px rgba(0,0,0,0.25); box-shadow: 5px 5px 45px 9px rgba(0,0,0,0.25); 
+RTNTHIS;
+        } else {
+          $rtnthis = <<<RTNTHIS
+ 
+body { background: rgba({$this->color_white},1); position: relative; } 
+#waiterDialog { text-align: center; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba({$this->color_lamber},.4); border: 8px solid rgba({$this->color_grey},1); padding: 5vh 8vw; border-radius: 8px; font-family: Roboto; font-size: 2vh; color: rgba({$this->color_dark1},1); -webkit-box-shadow: 5px 5px 45px 9px rgba(0,0,0,0.25); box-shadow: 5px 5px 45px 9px rgba(0,0,0,0.25); }
+
+#errorDialog { display: none;text-align: center; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba({$this->color_lamber},.4); border: 8px solid rgba({$this->color_grey},1); padding: 5vh 8vw; border-radius: 8px; font-family: Roboto; font-size: 2vh; color: rgba({$this->color_dark1},1); -webkit-box-shadow: 5px 5px 45px 9px rgba(0,0,0,0.25); box-shadow: 5px 5px 45px 9px rgba(0,0,0,0.25); } 
+
+#requestForm { margin: 14vh 3vw 1vh 3vw; display: grid; grid-template-columns: 20vw auto; grid-gap: .2vw;  }
+#requestForm #rListSide { height: 78vh; border: 1px solid #000; overflow: auto;   }
+
+   
+#requestForm #rFormSide { height: 78vh;    } 
+#requestForm #rFormSide #instructions { padding: 0 .3vw 2vh .3vw; } 
+#requestForm #rFormSide #lineOne { display: grid; grid-template-columns: repeat( 3, 13vw); padding: 0 .3vw; }
+
+
+
+
+#copyrightdsp { width: 100%; text-align: center; font-family: 'Roboto Condensed'; font-size: 1.2vh; color: rgba({$this->color_dark},1); background: rgba({$this->color_white},1); position: relative; z-index: 2; padding: 3vh 8vw 2vh 8vw; } 
+
+RTNTHIS;
+        }
+    return $rtnthis;
+}
 
 }
 

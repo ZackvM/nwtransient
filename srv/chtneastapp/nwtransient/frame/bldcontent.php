@@ -39,7 +39,31 @@ PGERTN;
         }        
         return $rtnthis;
     }
-     
+
+    function definerequest ( $rqst ) {
+        $tt = treeTop; 
+        require(serverkeys . "/sspdo.zck");
+        $newrqst = explode("/",str_replace("-","", $_SERVER['REQUEST_URI']));     
+        $paraSQL = "SELECT * FROM tidal.requestlist where requestlistid = :rlistID";
+        $paraRS = $conn->prepare( $paraSQL );
+        $paraRS->execute( array( ':rlistID' => $newrqst[2])); 
+        
+        if ( $paraRS->rowCount() < 1 ) { 
+            //POP ERROR
+        $rtnthis = <<<PGERTN
+             <div id=errorDialog><h1>NO PARAMETER CRITERIA FOUND FOR GIVEN IDENTIFIER</div>
+PGERTN;
+        } else {          
+          $at = genAppFiles; 
+          $waiter = base64file("{$at}/publicobj/graphics/icons/ajax-loader.gif","waitericon","gif",true);  
+          $rtnthis = <<<PGERTN
+<div id=waiterDialog>Accessing Systems.  Please wait.<p>We are building a request for you ...<div>{$waiter}</div></div>  
+<div id=displayBSData>&nbsp;</div>  
+PGERTN;
+        }        
+        return $rtnthis;
+    }
+    
     function newsearch ( $rqst ) { 
       $tt = treeTop;
       $ott = ownerTreeTop;

@@ -15,7 +15,7 @@ class javascriptr {
     $this->regcode = $reguser['i']; 
   }
 
-    function globalscripts ( $rqst ) {
+function globalscripts ( $rqst ) {
   session_start();
   $sid = session_id();
   $tt = treeTop;
@@ -88,7 +88,6 @@ class javascriptr {
 GLOBJAVA;
   return $rtnThis;
 }       
-
 
 function searchresults ( $rqst ) { 
   $dp = dataPath;
@@ -372,6 +371,61 @@ GLOBJAVA;
   return $rtnThis;
 }
 
+function definerequest ( $rqst ) { 
+  $dp = dataPath;
+  $tt = treeTop;
+  $rtnThis = "";
+  
+  $newrqst = explode("/",str_replace("-","", $_SERVER['REQUEST_URI']));     
+  $rtnThis = <<<GLOBJAVA
+
+   document.addEventListener('DOMContentLoaded', function() {
+       
+        makeThisRequest ( '{$newrqst[2]}'  )
+          .then (function (fulfilled) {         
+            if ( parseInt(fulfilled['ITEMSFOUND']) > 0 ) {
+              //DISPLAY DATA
+              byId('waiterDialog').style.display = 'none';
+              byId('displayBSData').innerHTML = fulfilled['DATA'];
+              byId('displayBSData').style.display = 'block';  
+            } else {
+              //DISPLAY NOT FOUND
+              byId('waiterDialog').style.display = 'none';
+              byId('displayBSData').style.display = 'none';  
+            }
+         })
+         .catch(function (error) {
+            console.log(error.message);
+         });          
+
+    });                  
     
+    var makeThisRequest = function ( whichurl ) { 
+      return new Promise(function(resolve, reject) {
+        var obj = new Object(); 
+        obj['requestedurl'] = whichurl;
+        var passdta = JSON.stringify(obj);         
+        httpage.open("POST","{$dp}/build-transient-request", true);    
+        httpage.setRequestHeader("Authorization","Basic " + btoa(regu+":"+regi));
+        httpage.onreadystatechange = function() { 
+          if (httpage.readyState === 4) {
+            if ( parseInt(httpage.status) === 200 ) { 
+              var dta = JSON.parse( httpage.responseText );  
+              resolve( dta );
+            } else { 
+              reject(Error("It broke!"));                  
+            }
+          }
+        };
+        httpage.send ( passdta );
+      });
+    }
+
+GLOBJAVA;
+        return $rtnThis;
+  
+    
+    
+}    
     
 }

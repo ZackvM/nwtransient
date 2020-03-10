@@ -41,10 +41,10 @@ PAGECONTENT;
       $tt = treeTop;      
       $at = genAppFiles;      
       if ( trim($rqst[2]) === "" ) { 
-         $pageData = "PAGE ERROR - NO SEARCH ID FOUND IN URI";
+         $pageData = "PAGE ERROR - NO REQUEST ID FOUND IN URI";
       } else { 
         $cb = new bldcontent();  
-        $pageData = $cb->searchresults( $rqst );
+        $pageData = $cb->definerequest( $rqst );
       }
      $pge = <<<PAGECONTENT
 <div id=mainPageDiv>
