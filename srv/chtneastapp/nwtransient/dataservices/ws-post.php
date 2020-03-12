@@ -33,8 +33,158 @@ function __construct() {
 }
 
 class datadoers {
-    
-   function buildtransientrequest ( $request, $passdata ) {
+
+    function transientrequestmakerconfirm ( $request, $passdata ) { 
+      $responseCode = 400;
+      $rows = array();
+      $msgArr = array(); 
+      $errorInd = 0;
+      $itemsfound = 0;
+      require(serverkeys . "/sspdo.zck");
+      $pdta = json_decode($passdata, true); 
+
+//{"rqstname":"Zack von Menchhofen","rqstphn":"2159903771","rqsteml":"zackvm.zv@gmail.com","rqstcopy":"1","rqstinst":"University of Pennsylvania/School of Medicine","rqstinv":"INV3000","rqstnotyetinv":"0","rqstnotes":"These are notes about this request","rqstid":"mfCoO5VzcNHi6de"}   
+      ( !array_key_exists( 'rqstname', $pdta ) ) ? (list( $errorInd, $msgArr[] ) = array(1 , "RQSTNAME IS MISSING FROM ARRAY.  FATAL ERROR")) : "";
+      ( !array_key_exists( 'rqstphn', $pdta ) ) ? (list( $errorInd, $msgArr[] ) = array(1 , "RQSTPHN IS MISSING FROM ARRAY.  FATAL ERROR")) : "";
+      ( !array_key_exists( 'rqsteml', $pdta ) ) ? (list( $errorInd, $msgArr[] ) = array(1 , "RQSTEML IS MISSING FROM ARRAY.  FATAL ERROR")) : "";
+      ( !array_key_exists( 'rqstinst', $pdta ) ) ? (list( $errorInd, $msgArr[] ) = array(1 , "RQSTINST IS MISSING FROM ARRAY.  FATAL ERROR")) : "";
+      ( !array_key_exists( 'rqstcopy', $pdta ) ) ? (list( $errorInd, $msgArr[] ) = array(1 , "RQSTCOPY IS MISSING FROM ARRAY.  FATAL ERROR")) : "";
+      ( !array_key_exists( 'rqstinv', $pdta ) ) ? (list( $errorInd, $msgArr[] ) = array(1 , "RQSTINV IS MISSING FROM ARRAY.  FATAL ERROR")) : "";
+      ( !array_key_exists( 'rqstnotyetinv', $pdta ) ) ? (list( $errorInd, $msgArr[] ) = array(1 , "RQSTNOTYETINV IS MISSING FROM ARRAY.  FATAL ERROR")) : "";
+      ( !array_key_exists( 'rqstnotes', $pdta ) ) ? (list( $errorInd, $msgArr[] ) = array(1 , "RQSTNOTES IS MISSING FROM ARRAY.  FATAL ERROR")) : "";
+      ( !array_key_exists( 'rqstid', $pdta ) ) ? (list( $errorInd, $msgArr[] ) = array(1 , "RQSTNOTES IS MISSING FROM ARRAY.  FATAL ERROR")) : "";
+
+      if ( $errorInd === 0 ) {   
+        ( trim($pdta['rqstname']) === "" || trim($pdta['rqstname']) === "" || trim($pdta['rqsteml']) === "" || trim($pdta['rqstinst']) === "" || trim($pdta['rqstid']) === "" ) ? (list( $errorInd, $msgArr[] ) = array(1 , "All Fields marked with a astericks (*) are required.  Try again.")) : "";        
+        if ( $errorInd === 0 ) { 
+          ( !filter_var($pdta['rqsteml'], FILTER_VALIDATE_EMAIL) ) ? (list( $errorInd, $msgArr[] ) = array(1 , "The entered email doesn't seem to be valid.  Try again.")) : "";
+          if ( $errorInd === 0 ) { 
+            $updSQL = "update tidal.requestlist set rqstname = :rqstname, rqstphn = :rqstphn, rqsteml = :rqsteml, copyme = :copyme, rqstinstitution = :rqstinstitution, investigatorcode = :rqstinvestigatorcode, notyetinvind = :rqstnotyet, rqstnotes = :rqstnotes, rqston = now() where requestlistid = :rqstid";
+            $updRS = $conn->prepare( $updSQL );
+            $updRS->execute( array(
+               ':rqstname' => trim($pdta['rqstname'])
+              ,':rqstphn' => trim($pdta['rqstphn'])
+              ,':rqsteml' => trim($pdta['rqsteml'])
+              ,':copyme' => (int)$pdta['rqstcopy']
+              ,':rqstinstitution' => trim($pdta['rqstinst'])
+              ,':rqstinvestigatorcode' => trim($pdta['rqstinv'])
+              ,':rqstnotyet' => (int)$pdta['rqstnotyetinv']
+              ,':rqstnotes' => trim($pdta['rqstnotes'])
+              ,':rqstid' => $pdta['rqstid']
+            ));
+
+            //CREATE EMAIL 
+            //TODO:  MAKE THIS DYNAMIC AND MAKE IT DEPENDENT ON THE DIVISION OF THE BIOSAMPLES SELECTED
+            //TODO:  MAKE A SEPERATE FUNCTION
+            $at = genAppFiles; 
+            $emaillist[] = "zacheryv@pennmedicine.upenn.edu";
+            //$emaillist[] = "dfitzsim@pennmedicine.upenn.edu";
+            if ( (int)$pdta['rqstcopy'] === 1 ) { $emaillist[] = $pdta['rqsteml']; } 
+            $refid = strtoupper(generateRandomString(4)); 
+            $sbj = "CHTN TRANSIENT INVENTORY REQUEST ({$refid})";
+            $chtnimg = base64file("{$at}/publicobj/graphics/chtn-microscope-white.png","CHTNLogo","png",true);
+            $emlNote = preg_replace('/\n/','<br>', preg_replace('/\n\n/','<p>',$pdta['rqstnotes'])); 
+
+            $detSQL = "select sampleid, sampledefinition from tidal.requestlistdetails where rqstlistid = :rqstid and dspind = 1"; 
+            $detRS = $conn->prepare( $detSQL ); 
+            $detRS->execute(array(':rqstid' => $pdta['rqstid']));
+
+            if ( $detRS->rowCount() > 0 ) { 
+              $detTbl = "<table width=100%><tr><td colspan=5 style=\"font-family: arial; font-size: 12pt; font-weight: bold;\">Biosample(s) Requested: " . $detRS->rowCount() . "</td></tr><tr>";
+              $cellCntr = 0;
+              while ( $d = $detRS->fetch(PDO::FETCH_ASSOC)) {
+                if ( $cellCntr === 4 ) {
+                  $detTbl .= "</tr><tr>";
+                  $cellCntr = 0;
+                }
+
+                $det = json_decode( $d['sampledefinition'], true);
+
+                $dxd = trim($det['spc']);
+                $dxd .= ( trim($dxd) !== "" ) ? " :: " . $det['ste'] : $det['ste'];
+                $dxd .= ( trim($dxd) !== "" ) ? " :: " . $det['dxd'] : $det['dxd'];
+                  
+                $smpid = preg_replace('/^EST\-/','',$d['sampleid']);
+
+                $detTbl .= <<<DETTBL
+<td style="border: 1px solid rgba(0,32,133,1); "> 
+  <table>
+    <tr><td style="font-family: arial; font-size: 12pt; color: rgba(0,32,113,1); font-weight: bold;">Biosample ID</td></tr>
+    <tr><td style="font-family: arial; font-size: 14pt; color: rgba(0,32,113,1);"> {$smpid} </td></tr>
+    <tr><td style="font-family: arial; font-size: 12pt; color: rgba(0,32,113,1); font-weight: bold;">Preparation</td></tr>
+    <tr><td style="font-family: arial; font-size: 14pt; color: rgba(0,32,113,1);"> {$det['prp']} </td></tr>
+    <tr><td style="font-family: arial; font-size: 12pt; color: rgba(0,32,113,1); font-weight: bold;">Designation</td></tr>
+    <tr><td style="font-family: arial; font-size: 14pt; color: rgba(0,32,113,1);"> {$dxd} </td></tr>
+  </table> 
+</td>
+DETTBL;
+                $cellCntr++;    
+              }
+              $detTbl .= "</tr></table>";
+            }
+
+
+            $emlbody = <<<EMAILBODY
+<table width=100% style="border: 1px solid rgba(0,0,0,1);">
+  <tr><td>
+    <table width=100% cellpadding=0 cellspacing=0 style="background: rgba(0,32,113,1);">
+      <tr><td style="padding: 5px 0 5px 6px;">{$chtnimg}</td>
+      <td align=right style="color: rgba(255,255,255,1); padding: 5px 6px 5px 0; font-family: arial; font-size: 14pt;" ><b>Cooperative Human Tissue Network (CHTN)</b><br>Eastern Division<br>Perelman School of Medicine<br>University of Pennsylvania<br>3400 Spruce Street, 565 Dulles<br>Philadelphia, PA 19104<br>(215) 662-4570&nbsp;&nbsp;|&nbsp;&nbsp;chtnmail@uphs.upenn.edu     </td></tr>
+    </table>
+
+  </td></tr>
+
+  <tr><td>
+   <table width=100%><tr><td style="text-align: center; font-family: arial; font-size: 14pt; font-weight: bold; color: rgba(0,32,113,1); padding: 8px 0 10px 0; width: 100%;">DO NOT RESPOND THIS EMAIL IS UNMONITORED.</td></tr></table>
+  </td></tr>
+
+  <tr><td>
+   <table width=100%><tr><td style="text-align: center; font-family: arial; font-size: 17pt; font-weight: bold; color: rgba(0,32,113,1); padding: 8px 0 0 0; border-bottom: 2px solid rgba(0,32,113,1); width: 100%;">CHTN Transient Inventory Request</td></tr></table>
+  </td></tr>
+
+  <tr><td>
+    <center>
+    <table>
+     <tr>
+       <td style="padding: 8px 10px;" valign=top><div style="font-size: 12pt; font-style: italic; color: rgba(0,32,113,1);font-family: arial;border-bottom: 1px solid rgba(0,32,113,1);">Requestor</div><div style="font-family: arial; font-size: 14pt; ">{$pdta['rqstname']}&nbsp;</div><div style="font-family: arial; font-size: 12pt; ">{$pdta['rqstinst']}&nbsp;</div></td> 
+       <td style="padding: 8px 10px;" valign=top><div style="font-size: 12pt; font-style: italic; color: rgba(0,32,113,1);font-family:arial;border-bottom: 1px solid rgba(0,32,113,1);">Contact Phone</div><div style="font-family: arial; font-size: 14pt; ">{$pdta['rqstphn']}&nbsp;</div><div style="font-family: arial; font-size: 12pt; ">&nbsp;</div></td> 
+       <td style="padding: 8px 10px;" valign=top><div style="font-size: 12pt; font-style: italic; color: rgba(0,32,113,1);font-family:arial;border-bottom: 1px solid rgba(0,32,113,1);">Contact Email</div><div style="font-family: arial; font-size: 14pt; ">{$pdta['rqsteml']}&nbsp;</div><div style="font-family: arial; font-size: 12pt; ">&nbsp;</div></td> 
+       <td style="padding: 8px 10px;" valign=top><div style="font-size: 12pt; font-style: italic; color: rgba(0,32,113,1);font-family:arial;border-bottom: 1px solid rgba(0,32,113,1);">Investigator Code</div><div style="font-family: arial; font-size: 14pt; ">{$pdta['rqstinv']}&nbsp;</div><div style="font-family: arial; font-size: 12pt; ">&nbsp;</div></td> 
+       <td style="padding: 8px 10px;" valign=top><div style="font-size: 12pt; font-style: italic; color: rgba(0,32,113,1);font-family:arial;border-bottom: 1px solid rgba(0,32,113,1);">Notes</div><div style="font-family: arial; font-size: 14pt; ">{$emlNote}&nbsp;</div></td> 
+     </tr>
+    </table>
+
+  </td></tr>
+
+  <tr><td>
+   <table width=100%><tr><td style="text-align: center; font-family: arial; font-size: 17pt; font-weight: bold; color: rgba(0,32,113,1); padding: 8px 0 0 0; border-bottom: 2px solid rgba(0,32,113,1); width: 100%;">Biosamples Requested</td></tr></table>
+  </td></tr>
+
+  <tr><td>
+    {$detTbl}
+  </td></tr>
+
+</table>
+
+EMAILBODY;
+
+            $emailSQL = "insert into serverControls.emailthis(towhoaddressarray, sbjtline, msgbody, htmlind, wheninput, bywho) values(:towhoaddressarray, :sbjtline, :msgbody, 1, now(), 'TRANSIENT-INVENTORY-APP')";
+            $emailRS = $conn->prepare($emailSQL);
+            $emailRS->execute(array(
+                ':towhoaddressarray' => json_encode( $emaillist ), ':sbjtline' => $sbj, ':msgbody' => $emlbody
+            ));
+
+            $responseCode = 200;
+          }
+        }
+      } 
+      $msg = $msgArr;
+      $rows['statusCode'] = $responseCode; 
+      $rows['data'] = array( 'RESPONSECODE' => $responseCode, 'MESSAGE' => $msg, 'ITEMSFOUND' => $itemsfound, 'DATA' => $dta);
+      return $rows;               
+    }
+
+    function transientrequestremovebsitem ( $request, $passdata ) { 
      $responseCode = 400;
      $rows = array();
      $msgArr = array(); 
@@ -44,77 +194,139 @@ class datadoers {
      session_start(); 
      $sessid = session_id();      
      $pdta = json_decode($passdata, true); 
+//{"requestedurl":"mfCoO5VzcNHi6de","bsitmid":"EST-79771T001","selectorind":0}
+
+     $updSQL = "update tidal.requestlistdetails set dspind = :dspind where rqstlistid = :requestedurl and sampleid = :bsitemid";
+     $updRS = $conn->prepare( $updSQL );
+     $updRS->execute( array(':requestedurl' => $pdta['requestedurl'], ':bsitemid' => $pdta['bsitmid'], ':dspind' => $pdta['selectorind'] ));
+
+     $dta = $updRS->rowCount();
+     if ( $updRS->rowCount() > 0 ) { 
+         $responseCode = 200;
+     }
+
+     $msg = $msgArr;
+     $rows['statusCode'] = $responseCode; 
+     $rows['data'] = array( 'RESPONSECODE' => $responseCode, 'MESSAGE' => $msg, 'ITEMSFOUND' => $itemsfound, 'DATA' => $dta);
+     return $rows;               
+    } 
+
+   function buildtransientrequest ( $request, $passdata ) {
+     $responseCode = 400;
+     $rows = array();
+     $msgArr = array(); 
+     $errorInd = 0;
+     $itemsfound = 0;
+     require(serverkeys . "/sspdo.zck");
+     $pdta = json_decode($passdata, true); 
      $at = genAppFiles;
+     $tt = treeTop;
        
           //TODO:  Data Checks
-        $paraSQL = "SELECT * FROM tidal.requestlist where requestlistid = :rlistID";
+        $paraSQL = "SELECT requestlistid, ifnull(rqston,'') as rqston FROM tidal.requestlist where requestlistid = :rlistID";
         $paraRS = $conn->prepare( $paraSQL );
         $paraRS->execute( array( ':rlistID' => $pdta['requestedurl'])); 
 
-        ( $paraRS->rowCount() < 1 ) ?  (list( $errorInd, $msgArr[] ) = array(1 , "ERROR!  NO REQUEST IDENTIFIER FOUND")) : "" ;
-        
-        
+        ( $paraRS->rowCount() <> 1 ) ?  (list( $errorInd, $msgArr[] ) = array(1 , "ERROR!  NO REQUEST IDENTIFIER FOUND")) : "" ;
 
-     if ( $errorInd === 0 ) {
 
+        if ( $errorInd === 0 ) {
          
-         $detSQL = "SELECT sampleid, sampledefinition FROM tidal.requestlistdetails where rqstlistid = :rqstID"; 
-         $detRS = $conn->prepare ( $detSQL ); 
-         $detRS->execute(array(':rqstID' => $pdta['requestedurl'])); 
-         $det  = $detRS->fetchAll( PDO::FETCH_ASSOC);
+            $para = $paraRS->fetch(PDO::FETCH_ASSOC);
+            ( trim($para['rqston']) !== "" ) ? (list( $errorInd, $msgArr[] ) = array(1 , "The specified request id has already been submitted. <p><a href=\"{$tt}/new-search\">Click here to perform a new search</a> ")) : "" ;
+                        
+            
+         if ( $errorInd === 0 ) {
+           $detSQL = "SELECT sampleid, sampledefinition FROM tidal.requestlistdetails where rqstlistid = :rqstID"; 
+           $detRS = $conn->prepare ( $detSQL ); 
+           $detRS->execute(array(':rqstID' => $pdta['requestedurl'])); 
+           $det  = $detRS->fetchAll( PDO::FETCH_ASSOC);
          
-         foreach ( $det as $dk => $dv ) { 
+           foreach ( $det as $dk => $dv ) { 
              $itmB = json_decode( $dv['sampledefinition'], true);
              $dxd = "";             
              $dxd .= ( trim($itmB['spc']) !== "" ) ? "{$itmB['spc']}" : "";
              $dxd .= ( trim($itmB['ste']) !== "" ) ? " :: {$itmB['ste']}" : "";
              $dxd .= ( trim($itmB['dxd']) !== "" ) ? " :: {$itmB['dxd']}" : "";                         
              $rqstList .= "<div class=bsitem>"; 
-                $rqstList .= "<div class=dxddsp><div class=dxddsplabel>Diagnosis Designation</div><div class=dxd>{$dxd}</div></div>";         
+                $rqstList .= "<div class=chkrHld><label class=chkBoxDsp><input type=\"checkbox\" checked=\"checked\" onchange=\"bsitemselector('{$pdta['requestedurl']}','{$dv['sampleid']}',this.checked);\"><span class=\"checkmark\"></span></label></div> <div class=dxddsp> <div class=dxddsplabel>Diagnosis Designation</div><div class=dxd>{$dxd}</div></div>"; 
                 $rqstList .= "<div class=dxddsp><div class=dxddsplabel>Preparation</div><div class=dxd>{$itmB['prp']}</div></div>"; 
                 $rqstList .= "<div class=bsitemid>{$dv['sampleid']}</div>";                          
              $rqstList .= "</div>";
-         }
-         
-
-
-         
-       $thisyear = date('Y');  
-       $rtnPage = <<<RTNPAGE
+           }
+           $thisyear = date('Y');  
+           $rtnPage = <<<RTNPAGE
 <div id=requestForm>
-    <div id=rListSide>
-       {$rqstList}        
-    </div>
+
     <div id=rFormSide>
-      <div id=instructions>Fill out this form and a research specialist will be in contact with you about these biosamples.  All requested biosamples must match a valid and approved CHTN protocol request.  If you do not have one then the research specialist will assist you with that as well.  All biosamples requested are subject to verified availability.</div>  
+      <div  class=introHead id=instructions>Fill out this form and a research specialist will be in contact with you about these biosamples.  All requested biosamples must match a valid and approved CHTN protocol request.  If you do not have one then the research specialist will assist you with that as well.  All biosamples requested are subject to verified availability.</div>  
       <div id=lineOne>
 
          <div class=dataElemHold>
-            <div class=dataElemLbl>Your Name</div>
+            <div class=dataElemLbl>Your Name *</div>
             <div class=dataElem><input type=text id=fldYourName></div>
          </div>       
 
          <div class=dataElemHold>
-            <div class=dataElemLbl>Your Phone Number</div>
+            <div class=dataElemLbl>Your Phone Number *</div>
             <div class=dataElem><input type=text id=fldYourPhone></div>
          </div>              
 
          <div class=dataElemHold>
-            <div class=dataElemLbl>Your Email</div>
+            <div class=dataElemLbl>Your Email *</div>
             <div class=dataElem><input type=text id=fldYourEmail></div>
+            <div id=copymediv> <input type=text id=fldCopyMe value=1> <label class=chkBoxDsp id=copymelbl>Copy Me!&nbsp<input id=copymechkbox onchange=" byId('fldCopyMe').value = ( this.checked ) ? 1 : 0;" type="checkbox" checked="checked"><span class="checkmark"></span></label> </div>
          </div>          
        
-       
-       
-       </div>
-     </div>                              
+     </div>
+
+     <div id=linetwo>
+
+         <div class=dataElemHold>
+            <div class=dataElemLbl>Your Institution *</div>
+            <div class=dataElem><input type=text id=fldYourInstitution></div>
+         </div>              
+
+         <div class=dataElemHold>
+            <div class=dataElemLbl>Your CHTN Investigator ID</div>
+            <div class=dataElem><input type=text id=fldYourInvestid></div>
+            <div id=notyetdiv> <input type=text id=fldNotYetInv value=0> <label class=chkBoxDsp id=NINVEST>Not a CHTN investigator (Yet)&nbsp<input id=notyetchkbox onchange=" byId('fldNotYetInv').value = ( this.checked ) ? 1 : 0;"  type="checkbox"><span class="checkmark"></span></label> </div>
+         </div>              
+
+     </div>
+
+     <div id=linethree>
+
+         <div class=dataElemHold>
+            <div class=dataElemLbl>Include this note with my request</div>
+            <div class=dataElem><textarea id=fldYourNotes style="resize: none; box-sizing: border-box; font-family: Roboto; font-size: 1.8vh;color: rgba(0,32,113,1); padding: .7vh .3vw; border: 1px solid rgba(0,32,113,1); width: 53vw; height: 15vh; "></textarea></div>
+         </div>              
+
+     </div>
+
+     <div id=linefour><center>
+
+       <div id=btnSubmit class=zckBtn onclick="wrapuprequest();">Send Request</div>
+
+     </div>
+
+    </div>                              
+
+    <div class=introHead>Biosamples Selected</div>
+    <div id=rListSide>
+       {$rqstList}        
+    </div>
+
+
 </div>               
    <div id=copyrightdsp> &#9400; Copyright Code and Content - CHTN Eastern Division/Perelman School of Medicine, University of Pennsylvania 2007-{$thisyear} </div>                              
 RTNPAGE;
-         $dta = $rtnPage;
-         $itemsfound = 1;
-         $responseCode = 200;
-     } 
+           $dta = $rtnPage;
+           $itemsfound = 1;
+           $responseCode = 200;
+       }
+         
+        }
      
      $msg = $msgArr;
      $rows['statusCode'] = $responseCode; 

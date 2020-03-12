@@ -380,7 +380,7 @@ function definerequest ( $rqst ) {
   $rtnThis = <<<GLOBJAVA
 
    document.addEventListener('DOMContentLoaded', function() {
-       
+
         makeThisRequest ( '{$newrqst[2]}'  )
           .then (function (fulfilled) {         
             if ( parseInt(fulfilled['ITEMSFOUND']) > 0 ) {
@@ -395,11 +395,42 @@ function definerequest ( $rqst ) {
             }
          })
          .catch(function (error) {
-            console.log(error.message);
+            byId('waiterDialog').innerHTML = error.message;
          });          
 
     });                  
-    
+
+    function wrapuprequest() {
+      var obj = new Object();
+      obj['rqstname'] = byId('fldYourName').value.trim(); 
+      obj['rqstphn'] = byId('fldYourPhone').value.trim(); 
+      obj['rqsteml'] = byId('fldYourEmail').value.trim();
+      obj['rqstcopy'] = byId('fldCopyMe').value; 
+      obj['rqstinst'] = byId('fldYourInstitution').value.trim();
+      obj['rqstinv'] = byId('fldYourInvestid').value.trim();
+      obj['rqstnotyetinv'] = byId('fldNotYetInv').value;
+      obj['rqstnotes'] = byId('fldYourNotes').value.trim();
+      obj['rqstid'] = '{$newrqst[2]}';
+      var passdta = JSON.stringify(obj);      
+      var mlURL = "/transient-request-maker-confirm";
+      universalAJAX("POST",mlURL,passdta,answerWrapupRequest,2);          
+    }
+
+    function answerWrapupRequest ( rtnData ) { 
+      if (parseInt(rtnData['responseCode']) !== 200) { 
+        var msgs = JSON.parse(rtnData['responseText']);
+        var dspMsg = ""; 
+        msgs['MESSAGE'].forEach(function(element) { 
+          dspMsg += "\\n - "+element;
+        });
+        //ERROR MESSAGE HERE
+        alert("ERROR:\\n"+dspMsg);
+      } else {
+        alert('Request has been made.  Thank you.'); 
+        window.location.href = "{$tt}/new-search"; 
+      }                  
+    }
+
     var makeThisRequest = function ( whichurl ) { 
       return new Promise(function(resolve, reject) {
         var obj = new Object(); 
@@ -413,12 +444,32 @@ function definerequest ( $rqst ) {
               var dta = JSON.parse( httpage.responseText );  
               resolve( dta );
             } else { 
-              reject(Error("It broke!"));                  
+              var msgs = JSON.parse(httpage.responseText);
+              var dspMsg = ""; 
+              msgs['MESSAGE'].forEach(function(element) { 
+                dspMsg += "<br> - "+element;
+              });
+              //ERROR MESSAGE HERE
+              reject(Error( dspMsg ));                  
             }
           }
         };
         httpage.send ( passdta );
       });
+    }
+
+    function bsitemselector ( whichrsltid, whichbsid, selectorind ) { 
+        var obj = new Object(); 
+        obj['requestedurl'] = whichrsltid;
+        obj['bsitmid'] = whichbsid;
+        obj['selectorind'] = ( selectorind ) ? 1 : 0; 
+        var passdta = JSON.stringify(obj);         
+        var mlURL = "/transient-request-remove-bs-item";
+        universalAJAX("POST",mlURL,passdta,answerbsitemselector,0);          
+    }
+
+    function answerbsitemselector ( rtnData ) { 
+      //NOTHING DOING
     }
 
 GLOBJAVA;

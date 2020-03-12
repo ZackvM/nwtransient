@@ -362,18 +362,53 @@ body { background: rgba({$this->color_white},1); position: relative; }
 
 #errorDialog { display: none;text-align: center; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba({$this->color_lamber},.4); border: 8px solid rgba({$this->color_grey},1); padding: 5vh 8vw; border-radius: 8px; font-family: Roboto; font-size: 2vh; color: rgba({$this->color_dark1},1); -webkit-box-shadow: 5px 5px 45px 9px rgba(0,0,0,0.25); box-shadow: 5px 5px 45px 9px rgba(0,0,0,0.25); } 
 
-#requestForm { margin: 14vh 3vw 1vh 3vw; display: grid; grid-template-columns: 20vw auto; grid-gap: .2vw;  }
-#requestForm #rListSide { height: 78vh; border: 1px solid #000; overflow: auto;   }
+    input {  box-sizing: border-box; font-family: Roboto; font-size: 1.8vh;color: rgba({$this->color_zackgrey},1); padding: .7vh .3vw; border: 1px solid rgba({$this->color_dark1},1); }
+    input:focus, input:active {background: rgba({$this->color_lamber},.5); border: 1px solid rgba({$this->color_dblue},.5);  outline: none;  }
 
+#requestForm { margin: 14vh 3vw 1vh 3vw; display: grid; grid-template-columns: 60vw 30vw; grid-gap: .2vw;  }
+#requestForm .introHead { font-size: 1.8vh; color: rgba({$this->dark1},1);  } 
+#requestForm #rListSide { height: 53vh; overflow: auto; display: grid; grid-gap: .3vh; padding: 0 .2vw 0 0;   }
+#requestForm #rListSide .bsitem { border: 1px solid #000; display: grid; grid-template-columns: 2vw auto;  }
+#requestForm #rListSide .bsitem .chkrHld { grid-row: span 2; width: 2vw; padding: 1vh 0 0 .4vw; }
+#requestForm #rListSide .bsitem .bsitemid  { font-size: 1vh; color: rgba({$this->color_white},1); background: rgba({$this->color_zackgrey},.4); grid-column: span 2; text-align: right; padding: 3px;}  
+#requestForm #rListSide .bsitem .dxddsplabel { font-size: 1vh; font-style: italic; color: rgba({$this->color_dark1},1); padding: .2vh 0 0 0;  }
+#requestForm #rListSide .bsitem .dxd { font-size: 1.4vh; font-weight: bold; color: rgba({$this->color_dark},1); padding: 0 0 .3vh .3vw;      }  
+
+.chkBoxDsp { display: block; position: relative;  cursor: pointer;  -webkit-user-select: none;  -moz-user-select: none;  -ms-user-select: none;  user-select: none;   }
+.chkBoxDsp input { position: absolute; opacity: 0;   }
+.chkBoxDsp .checkmark { position: absolute; top: 0; height: 25px; width: 25px; background-color: #eee; }
+.chkBoxDsp:hover input ~ .checkmark {  background-color: #ccc; }
+.chkBoxDsp input:checked ~ .checkmark { background-color: #2196F3; }
+.chkBoxDsp .checkmark:after { content: ""; position: absolute; display: none; }
+.chkBoxDsp input:checked ~ .checkmark:after { display: block; } 
+.chkBoxDsp .checkmark:after { left: 9px; top: 5px; width: 5px; height: 10px; border: solid white; border-width: 0 3px 3px 0; -webkit-transform: rotate(45deg); -ms-transform: rotate(45deg); transform: rotate(45deg); } 
    
-#requestForm #rFormSide { height: 78vh;    } 
-#requestForm #rFormSide #instructions { padding: 0 .3vw 2vh .3vw; } 
-#requestForm #rFormSide #lineOne { display: grid; grid-template-columns: repeat( 3, 13vw); padding: 0 .3vw; }
+#requestForm #rFormSide { height: 55vh; grid-row: span 2; margin-left: 3vw;   } 
+#requestForm #rFormSide #instructions { padding: 0 .3vw 2vh .3vw; text-align: justify; width: 55vw; } 
+#requestForm #rFormSide #lineOne { display: grid; grid-template-columns: 20vw 13vw 20vw; padding: 2vh .3vw; grid-gap: .2vw; }
+#requestForm #rFormSide #linetwo { display: grid; grid-template-columns: 40vw 13vw; padding: 2vh .3vw;  grid-gap: .2vw; }
+#requestForm #rFormSide #linethree { padding: 2vh .3vw 0 .3vw; }
+#requestForm #rFormSide #linefour { padding: 2vh .3vw 0 .3vw; }
+#requestForm #rFormSide .dataElemHold { }
+#requestForm #rFormSide .dataElemHold .dataElemLbl { font-size: 1.4vh; color: rgba({$this->color_dark1},1); font-weight: bold;  }  
 
+#fldYourName { width: 20vw;  } 
+#fldYourPhone { width: 13vw; } 
+#fldYourEmail { width: 20vw; } 
+#copymelbl { font-size: 1.2vh; font-weight: bold; color: rgba({$this->color_dark1},1); padding: .3vh 0 0 0; }
+#fldCopyMe { display: none; } 
+#NINVEST { font-size: 1.2vh; font-weight: bold; color: rgba({$this->color_dark1},1); padding: .3vh 0 0 0; }
+#copymediv { padding: .3vh 0 0 15vw; }
+#notyetdiv { padding: .3vh 0 0 2vw; }
+#fldNotYetInv { display: none; } 
+#fldYourInstitution { width: 40vw; } 
+#fldYourInvestid { width: 13vw; }
+#fldYourNotes {  } 
 
+    .zckBtn { display: block; border: 1px solid rgba({$this->color_dark1},1); width: 7vw; text-align: center; padding: 1vh .5vw; background: rgba({$this->color_dark1},1); color: rgba({$this->color_white},1); font-family: 'Roboto'; font-size: 1.4vh; font-weight: bold; -webkit-transition-duration: 0.5s; transition-duration: 0.5s; transition: 0.5s; }
+    .zckBtn:hover { cursor: pointer; background: rgba({$this->color_highlight},1); }
 
-
-#copyrightdsp { width: 100%; text-align: center; font-family: 'Roboto Condensed'; font-size: 1.2vh; color: rgba({$this->color_dark},1); background: rgba({$this->color_white},1); position: relative; z-index: 2; padding: 3vh 8vw 2vh 8vw; } 
+#copyrightdsp { width: 100%; text-align: center; font-family: 'Roboto Condensed'; font-size: 1.2vh; color: rgba({$this->color_dark},1); background: rgba({$this->color_white},1); position: relative; z-index: 2; padding: 18vh 8vw 2vh 8vw; } 
 
 RTNTHIS;
         }
